@@ -5,8 +5,6 @@ import com.astayc.hontodare.DTO.Auth.RegisterDTO;
 import com.astayc.hontodare.Entity.Enum.Role;
 import com.astayc.hontodare.Entity.User;
 import com.astayc.hontodare.Exception.HontoDareException;
-import com.astayc.hontodare.Exception.InvalidCredentialsException;
-import com.astayc.hontodare.Exception.UserAlreadyExistsException;
 import com.astayc.hontodare.Repository.UserRepository;
 import com.astayc.hontodare.Service.UserService;
 import com.astayc.hontodare.Util.JwtUtil;
@@ -41,29 +39,22 @@ public class UserServiceImpl implements UserService {
                 .name(registerDTO.getName())
                 .email(registerDTO.getEmail())
                 .password(passwordEncoder.encode(registerDTO.getPassword()))
-                .avatarUrl(registerDTO.getAvatarUrl())
-                .role(Role.USER) // Default role
+                .role(Role.USER)
                 .points(0)
                 .build();
 
         userRepository.save(user);
-
-        String token = jwtUtil.generateToken(user);
-
-        return new AuthResponseDTO(user.getUsername(), token);
     }
 
     @Override
-    public  login(LoginDTO loginDTO) {
+    public String login(LoginDTO loginDTO) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
+                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword())
         );
 
-        User user = userRepository.findByUsername(loginDTO.getUsername())
+        User user = userRepository.findByEmail(loginDTO.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
 
-        String token = jwtUtil.generateToken(user);
-
-        return new AuthResponseDTO(user.getUsername(), token);
+        return jwtUtil.generateToken(user.getId() , user.getRole().toString());
     }
 }
