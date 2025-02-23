@@ -13,7 +13,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Game {
 
     @Id
@@ -48,6 +47,7 @@ public class Game {
     @Column(nullable = false, length = 50)
     private GameMode gameMode;
 
+    // Relationships
     @ManyToOne
     @JoinColumn(name = "roomId")
     private Room room;
@@ -61,14 +61,14 @@ public class Game {
     private User player2;
 
     @ManyToOne
+    @JoinColumn(name = "winnerId")
+    private User winner;
+
+    @ManyToOne
     @JoinColumn(name = "character1Id")
     private Character character1;
 
     @ManyToOne
     @JoinColumn(name = "character2Id")
     private Character character2;
-
-    @ManyToOne
-    @JoinColumn(name = "gameModeId")
-    private GameMode gameModeEntity;
 }
