@@ -1,4 +1,4 @@
-package com.astayc.hontodare.DTO;
+package com.astayc.hontodare.DTO.Solution;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

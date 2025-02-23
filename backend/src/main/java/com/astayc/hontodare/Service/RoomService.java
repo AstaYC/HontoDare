@@ -1,7 +1,7 @@
 package com.astayc.hontodare.Service;
 
 import com.astayc.hontodare.DTO.RoomDTO;
-import com.astayc.hontodare.Entity.Room;
+
 import java.util.List;
 
 public interface RoomService {

@@ -1,6 +1,6 @@
 package com.astayc.hontodare.Controller;
 
-import com.astayc.hontodare.DTO.ApiResponse;
+import com.astayc.hontodare.DTO.Solution.ApiResponse;
 import com.astayc.hontodare.DTO.Auth.LoginDTO;
 import com.astayc.hontodare.DTO.Auth.RegisterDTO;
 import com.astayc.hontodare.DTO.UserDTO;
