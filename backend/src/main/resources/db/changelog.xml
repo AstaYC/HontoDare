@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Existing changesets with preConditions to prevent re-running -->
+    <changeSet id="1" author="hontodare" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM pg_type
+                WHERE typname IN ('friendship_status_enum', 'notification_type_enum', 'role_type_enum')
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE TYPE friendship_status_enum AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
+            CREATE TYPE notification_type_enum AS ENUM ('FRIEND_REQUEST', 'GAME_INVITE', 'MESSAGE');
+        </sql>
+    </changeSet>
+
+    <changeSet id="2" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user"/>
+            </not>
+        </preConditions>
+        <createTable tableName="user">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="email" type="VARCHAR(100)"/>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="avatar_url" type="VARCHAR(255)"/>
+            <column name="points" type="INT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="character"/>
+            </not>
+        </preConditions>
+        <createTable tableName="character">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)"/>
+            <column name="category" type="VARCHAR(50)"/>
+            <column name="pic_url" type="VARCHAR(255)"/>
+            <column name="glance" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="9" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="room_category"/>
+            </not>
+        </preConditions>
+        <createTable tableName="room_category">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="category" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="10" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="game_mode"/>
+            </not>
+        </preConditions>
+        <createTable tableName="game_mode">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="mode" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="5" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="room"/>
+            </not>
+        </preConditions>
+        <createTable tableName="room">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)"/>
+            <column name="description" type="TEXT"/>
+            <column name="max_players" type="INT"/>
+            <column name="room_category_id" type="UUID"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="ROOM" baseColumnNames="room_category_id"
+                                 constraintName="fk_room_room_category"
+                                 referencedTableName="ROOM_CATEGORY" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="3" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="game"/>
+            </not>
+        </preConditions>
+        <createTable tableName="game">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="player1_id" type="UUID"/>
+            <column name="player2_id" type="UUID"/>
+            <column name="character1_id" type="UUID"/>
+            <column name="character2_id" type="UUID"/>
+            <column name="start_time" type="TIMESTAMP"/>
+            <column name="end_time" type="TIMESTAMP"/>
+            <column name="winner_id" type="UUID"/>
+            <column name="game_mode_id" type="UUID"/>
+            <column name="room_id" type="UUID"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="GAME" baseColumnNames="player1_id"
+                                 constraintName="fk_game_player1"
+                                 referencedTableName="USER" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="GAME" baseColumnNames="player2_id"
+                                 constraintName="fk_game_player2"
+                                 referencedTableName="USER" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="GAME" baseColumnNames="character1_id"
+                                 constraintName="fk_game_character1"
+                                 referencedTableName="CHARACTER" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="GAME" baseColumnNames="character2_id"
+                                 constraintName="fk_game_character2"
+                                 referencedTableName="CHARACTER" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="GAME" baseColumnNames="game_mode_id"
+                                 constraintName="fk_game_game_mode"
+                                 referencedTableName="GAME_MODE" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="GAME" baseColumnNames="room_id"
+                                 constraintName="fk_game_room"
+                                 referencedTableName="ROOM" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="6" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="friendship"/>
+            </not>
+        </preConditions>
+        <createTable tableName="friendship">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="player1_id" type="UUID"/>
+            <column name="player2_id" type="UUID"/>
+            <column name="status" type="friendship_status_enum"/>
+            <column name="created_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="FRIENDSHIP" baseColumnNames="player1_id"
+                                 constraintName="fk_friendship_player1"
+                                 referencedTableName="USER" referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="FRIENDSHIP" baseColumnNames="player2_id"
+                                 constraintName="fk_friendship_player2"
+                                 referencedTableName="USER" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="7" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="chat"/>
+            </not>
+        </preConditions>
+        <createTable tableName="chat">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sender_id" type="UUID"/>
+            <column name="recipient_id" type="UUID"/>
+            <column name="message" type="TEXT"/>
+            <column name="send_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="CHAT" baseColumnNames="sender_id"
+                                 constraintName="fk_chat_sender"
+                                 referencedTableName="USER" referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="CHAT" baseColumnNames="recipient_id"
+                                 constraintName="fk_chat_recipient"
+                                 referencedTableName="USER" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="8" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="notification"/>
+            </not>
+        </preConditions>
+        <createTable tableName="notification">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sender_id" type="UUID"/>
+            <column name="recipient_id" type="UUID"/>
+            <column name="type" type="notification_type_enum"/>
+            <column name="content" type="TEXT"/>
+            <column name="notified_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="NOTIFICATION" baseColumnNames="sender_id"
+                                 constraintName="fk_notification_sender"
+                                 referencedTableName="USER" referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="NOTIFICATION" baseColumnNames="recipient_id"
+                                 constraintName="fk_notification_recipient"
+                                 referencedTableName="USER" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="11" author="hontodare">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="game" columnName="time"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="game">
+            <column name="time" type="TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
