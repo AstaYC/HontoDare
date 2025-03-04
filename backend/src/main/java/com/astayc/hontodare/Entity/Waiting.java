@@ -15,6 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Waiting {
 
+    @Id
+    private UUID id;
+
     @Column(nullable = false)
     private UUID roomId;
 
@@ -29,4 +32,5 @@ public class Waiting {
         this.userId = userId;
         this.joinedAt = Timestamp.valueOf(LocalDateTime.now());
     }
+
 }

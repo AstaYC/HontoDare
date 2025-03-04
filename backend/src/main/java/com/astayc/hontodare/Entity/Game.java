@@ -20,44 +20,25 @@ public class Game {
     private UUID id;
 
     @Column(nullable = false)
-    private UUID roomId;
-
-    @Column(nullable = false)
-    private UUID player1Id;
-
-    @Column(nullable = false)
-    private UUID player2Id;
-
-    @Column(nullable = false)
-    private UUID character1Id;
-
-    @Column(nullable = false)
-    private UUID character2Id;
-
-    @Column(nullable = false)
     private Timestamp startTime;
 
     @Column(nullable = true)
     private Timestamp endTime;
 
-    @Column(nullable = true)
-    private UUID winnerId;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private GameMode gameMode;
 
-    // Relationships
     @ManyToOne
-    @JoinColumn(name = "roomId")
+    @JoinColumn(name = "roomId", nullable = false)
     private Room room;
 
     @ManyToOne
-    @JoinColumn(name = "player1Id")
+    @JoinColumn(name = "player1Id", nullable = false)
     private User player1;
 
     @ManyToOne
-    @JoinColumn(name = "player2Id")
+    @JoinColumn(name = "player2Id", nullable = false)
     private User player2;
 
     @ManyToOne
@@ -65,10 +46,10 @@ public class Game {
     private User winner;
 
     @ManyToOne
-    @JoinColumn(name = "character1Id")
+    @JoinColumn(name = "character1Id", nullable = false)
     private Character character1;
 
     @ManyToOne
-    @JoinColumn(name = "character2Id")
+    @JoinColumn(name = "character2Id", nullable = false)
     private Character character2;
 }
