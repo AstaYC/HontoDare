@@ -17,19 +17,19 @@ public class WaitingController {
     private WaitingService waitingService;
 
     @PostMapping("/{roomId}/join")
-    public ResponseEntity<Void> joinRoom(@PathVariable UUID roomId, @RequestHeader UUID userId) {
+    public ResponseEntity<Void> joinRoom(@PathVariable Long roomId, @RequestHeader Long userId) {
         waitingService.joinRoom(roomId, userId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{roomId}/leave")
-    public ResponseEntity<Void> leaveRoom(@PathVariable UUID roomId, @RequestHeader UUID userId) {
+    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, @RequestHeader Long userId) {
         waitingService.leaveRoom(roomId, userId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{roomId}/users")
-    public List<WaitingDTO> getRoomUsers(@PathVariable UUID roomId) {
+    public List<WaitingDTO> getRoomUsers(@PathVariable Long roomId) {
         return waitingService.getRoomUsers(roomId);
     }
 }

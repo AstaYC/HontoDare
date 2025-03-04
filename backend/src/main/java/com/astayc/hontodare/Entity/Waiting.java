@@ -16,18 +16,19 @@ import java.util.UUID;
 public class Waiting {
 
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
-    private UUID roomId;
+    private Long roomId;
 
     @Column(nullable = false)
-    private UUID userId;
+    private Long userId;
 
     @Column(nullable = false, updatable = false)
     private Timestamp joinedAt = Timestamp.valueOf(LocalDateTime.now());
 
-    public Waiting(UUID roomId, UUID userId) {
+    public Waiting(Long roomId, Long userId) {
         this.roomId = roomId;
         this.userId = userId;
         this.joinedAt = Timestamp.valueOf(LocalDateTime.now());

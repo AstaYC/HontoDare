@@ -22,18 +22,18 @@ public class WaitingServiceImpl implements WaitingService {
     private ModelMapper modelMapper;
 
     @Override
-    public void joinRoom(UUID roomId, UUID userId) {
+    public void joinRoom(Long roomId, Long userId) {
         Waiting waiting = new Waiting(roomId, userId);
         waitingRepository.save(waiting);
     }
 
     @Override
-    public void leaveRoom(UUID roomId, UUID userId) {
+    public void leaveRoom(Long roomId, Long userId) {
         waitingRepository.deleteByRoomIdAndUserId(roomId, userId);
     }
 
     @Override
-    public List<WaitingDTO> getRoomUsers(UUID roomId) {
+    public List<WaitingDTO> getRoomUsers(Long roomId) {
         List<Waiting> waitings = waitingRepository.findByRoomId(roomId);
         return waitings.stream().map(waiting -> modelMapper.map(waiting, WaitingDTO.class)).collect(Collectors.toList());
     }

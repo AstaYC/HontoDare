@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/games")
@@ -28,12 +28,12 @@ public class GameController {
     }
 
     @GetMapping("/{roomId}")
-    public List<GameDTO> getGamesByRoomId(@PathVariable UUID roomId) {
+    public List<GameDTO> getGamesByRoomId(@PathVariable Long roomId) {
         return gameService.getGamesByRoomId(roomId);
     }
 
     @DeleteMapping("/{gameId}")
-    public ResponseEntity<Void> deleteGame(@PathVariable UUID gameId) {
+    public ResponseEntity<Void> deleteGame(@PathVariable Long gameId) {
         gameService.deleteGame(gameId);
         return ResponseEntity.noContent().build();
     }

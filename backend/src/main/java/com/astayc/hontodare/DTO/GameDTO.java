@@ -11,14 +11,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class GameDTO {
 
-    private UUID id;
-    private UUID roomId;
-    private UUID player1Id;
-    private UUID player2Id;
-    private UUID character1Id;
-    private UUID character2Id;
+    private Long id;
+    private Long roomId;
+    private Long player1Id;
+    private Long player2Id;
+    private Long character1Id;
+    private Long character2Id;
     private java.sql.Timestamp startTime;
     private java.sql.Timestamp endTime;
-    private UUID winnerId;
+    private Long winnerId;
     private GameMode gameMode;
 }

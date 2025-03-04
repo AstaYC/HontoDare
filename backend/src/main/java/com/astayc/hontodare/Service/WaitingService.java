@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface WaitingService {
-    void joinRoom(UUID roomId, UUID userId);
-    void leaveRoom(UUID roomId, UUID userId);
-    List<WaitingDTO> getRoomUsers(UUID roomId);
+    void joinRoom(Long roomId, Long userId);
+    void leaveRoom(Long roomId, Long userId);
+    List<WaitingDTO> getRoomUsers(Long roomId);
 }

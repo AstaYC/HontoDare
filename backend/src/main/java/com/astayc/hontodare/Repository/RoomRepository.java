@@ -11,5 +11,5 @@ import java.util.UUID;
 public interface RoomRepository extends JpaRepository<Room, Long> {
     Boolean existsByName(String name);
     List<Room> findByCategory(String category);
-    void deleteById(UUID roomId);
+    void deleteById(Long roomId);
 }

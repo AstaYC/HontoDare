@@ -49,7 +49,7 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public void deleteCharacter(UUID id) {
+    public void deleteCharacter(Long id) {
         characterRepository.deleteById(id);
     }
 }

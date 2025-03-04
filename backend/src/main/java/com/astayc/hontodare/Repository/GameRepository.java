@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface GameRepository extends JpaRepository<Game, UUID> {
-    List<Game> findByRoomId(UUID roomId);
+public interface GameRepository extends JpaRepository<Game, Long> {
+    List<Game> findByRoomId(Long roomId);
 }

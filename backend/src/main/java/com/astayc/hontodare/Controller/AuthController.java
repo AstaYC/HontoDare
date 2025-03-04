@@ -41,7 +41,7 @@ public class AuthController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable Long id) {
         try {
             UserDTO userDTO = userService.getUserDTOById(id);
             return ResponseEntity.ok(ApiResponse.success(userDTO));
