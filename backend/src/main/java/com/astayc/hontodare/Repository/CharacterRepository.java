@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface CharacterRepository extends JpaRepository<Character, UUID> {
+public interface CharacterRepository extends JpaRepository<Character, Long> {
     List<Character> findByCategory(String category);
 }

@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserDTO {
 
-    private UUID id;
+    private Long id;
     private String username;
     private String name;
     private String email;

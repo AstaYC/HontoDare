@@ -35,13 +35,13 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<GameDTO> getGamesByRoomId(UUID roomId) {
+    public List<GameDTO> getGamesByRoomId(Long roomId) {
         List<Game> games = gameRepository.findByRoomId(roomId);
         return games.stream().map(game -> modelMapper.map(game, GameDTO.class)).collect(Collectors.toList());
     }
 
     @Override
-    public void deleteGame(UUID gameId) {
+    public void deleteGame(Long gameId) {
         gameRepository.deleteById(gameId);
     }
 

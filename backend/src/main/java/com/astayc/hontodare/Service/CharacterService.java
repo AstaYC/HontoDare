@@ -10,5 +10,5 @@ public interface CharacterService {
     CharacterDTO createCharacter(CharacterDTO characterDTO);
     List<CharacterDTO> getCharactersByCategory(String category);
     CharacterDTO updateCharacter(CharacterDTO characterDTO);
-    void deleteCharacter(UUID id);
+    void deleteCharacter(Long id);
 }

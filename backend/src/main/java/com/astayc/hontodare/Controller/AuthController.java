@@ -26,7 +26,7 @@ public class AuthController {
             userService.register(registerDTO);
             return ResponseEntity.ok("User registered successfully!");
         } catch (Exception e) {
-            return ResponseEntity.status(e instanceof HontoDareException ? ((HontoDareException) e).getStatus() : HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+                return ResponseEntity.status(e instanceof HontoDareException ? ((HontoDareException) e).getStatus() : HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -41,7 +41,7 @@ public class AuthController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable Long id) {
         try {
             UserDTO userDTO = userService.getUserDTOById(id);
             return ResponseEntity.ok(ApiResponse.success(userDTO));

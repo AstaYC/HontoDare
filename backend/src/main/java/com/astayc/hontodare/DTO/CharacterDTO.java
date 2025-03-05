@@ -10,7 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CharacterDTO {
 
-    private UUID id;
+    private Long id;
     private String name;
     private String category;
     private String picUrl;

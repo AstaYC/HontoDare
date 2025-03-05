@@ -15,18 +15,23 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Waiting {
 
-    @Column(nullable = false)
-    private UUID roomId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
-    private UUID userId;
+    private Long roomId;
+
+    @Column(nullable = false)
+    private Long userId;
 
     @Column(nullable = false, updatable = false)
     private Timestamp joinedAt = Timestamp.valueOf(LocalDateTime.now());
 
-    public Waiting(UUID roomId, UUID userId) {
+    public Waiting(Long roomId, Long userId) {
         this.roomId = roomId;
         this.userId = userId;
         this.joinedAt = Timestamp.valueOf(LocalDateTime.now());
     }
+
 }

@@ -42,14 +42,14 @@ public class CharacterServiceImpl implements CharacterService {
 
     @Override
     public CharacterDTO updateCharacter(CharacterDTO characterDTO) {
-        Character existingCharacter = characterRepository.findById(characterDTO.getId()).orElseThrow();
+        Character existingCharacter = characterRepository.findById(characterDTO .getId()).orElseThrow();
         modelMapper.map(characterDTO, existingCharacter);
         Character updatedCharacter = characterRepository.save(existingCharacter);
         return modelMapper.map(updatedCharacter, CharacterDTO.class);
     }
 
     @Override
-    public void deleteCharacter(UUID id) {
+    public void deleteCharacter(Long id) {
         characterRepository.deleteById(id);
     }
 }

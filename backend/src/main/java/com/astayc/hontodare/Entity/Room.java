@@ -3,6 +3,8 @@ package com.astayc.hontodare.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "room")
 @Getter
