@@ -6,6 +6,7 @@ import com.astayc.hontodare.DTO.UserDTO;
 import com.astayc.hontodare.Entity.Enum.Role;
 import com.astayc.hontodare.Entity.User;
 import com.astayc.hontodare.Exception.HontoDareException;
+import com.astayc.hontodare.Exception.InvalidCredentialsException;
 import com.astayc.hontodare.Repository.UserRepository;
 import com.astayc.hontodare.Service.UserService;
 import com.astayc.hontodare.Util.JwtUtil;
@@ -50,15 +51,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(LoginDTO loginDTO) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword())
-        );
+        String email = loginDTO.getEmail();
+        String password = loginDTO.getPassword();
 
-        User user = userRepository.findByEmail(loginDTO.getEmail())
+        // Retrieve user by email
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
 
-        return jwtUtil.generateToken(user.getId() , user.getRole().toString());
+        // Check password
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+
+        // Generate token
+        return jwtUtil.generateToken(user.getId(), user.getRole().toString());
     }
+
 
     @Override
     public UserDTO getUserDTOById(Long id) {

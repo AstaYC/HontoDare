@@ -30,6 +30,8 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public RoomDTO createRoom(RoomDTO roomDTO) {
         Room room = modelMapper.map(roomDTO, Room.class);
+        room.setMaxPlayers("2");
+        room.setCategory(roomDTO.getCategory());
         room = roomRepository.save(room);
         return modelMapper.map(room, RoomDTO.class);
     }

@@ -14,7 +14,7 @@ spring:
         format_sql: true
 
   liquibase:
-    enabled: true
+    enabled: false
     change-log: classpath:db/changelog.xml
 
 server:
@@ -34,11 +34,12 @@ devtools:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: false
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   liquibase:
     enabled: false

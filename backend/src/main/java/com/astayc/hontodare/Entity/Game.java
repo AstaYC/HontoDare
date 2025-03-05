@@ -30,26 +30,26 @@ public class Game {
     private GameMode gameMode;
 
     @ManyToOne
-    @JoinColumn(name = "roomId", nullable = false)
+    @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
     @ManyToOne
-    @JoinColumn(name = "player1Id", nullable = false)
+    @JoinColumn(name = "player1_id", nullable = false)
     private User player1;
 
     @ManyToOne
-    @JoinColumn(name = "player2Id", nullable = false)
+    @JoinColumn(name = "player2_id", nullable = false)
     private User player2;
 
     @ManyToOne
-    @JoinColumn(name = "winnerId")
+    @JoinColumn(name = "winner_id")
     private User winner;
 
     @ManyToOne
-    @JoinColumn(name = "character1Id", nullable = false)
+    @JoinColumn(name = "character1_id", nullable = false)
     private Character character1;
 
     @ManyToOne
-    @JoinColumn(name = "character2Id", nullable = false)
+    @JoinColumn(name = "character2_id", nullable = false)
     private Character character2;
 }
