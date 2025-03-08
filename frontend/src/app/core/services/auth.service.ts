@@ -89,5 +89,18 @@ export class AuthService {
     return localStorage.getItem('refreshToken');
   }
 
+  getCurrentUser(): any {
+    const token = this.tokenService.getToken();
+    if (token) {
+      return this.tokenService.getDecodedToken(token);
+    }
+    return null;
+  }
+
+  getCurrentUserId(): number | null {
+    return this.tokenService.getUserId();
+  }
+
+
   private errorMessage: string = '';
 }

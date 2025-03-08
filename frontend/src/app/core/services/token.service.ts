@@ -38,4 +38,13 @@ export class TokenService {
   clearToken(): void {
     localStorage.removeItem(this.TOKEN_KEY);
   }
+
+  getUserId(): number | null {
+    const token = this.getToken();
+    if (token) {
+      const decodedToken = this.getDecodedToken(token);
+      return decodedToken.userId; // Adjust based on your backend's JWT structure
+    }
+    return null;
+  }
 }
