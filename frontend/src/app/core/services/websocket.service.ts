@@ -27,6 +27,12 @@ export class WebSocketService {
 
       // Subscribe to public chat topic
       this.subscribeToTopic('/topic/public');
+
+      // Subscribe to gameplay chat topic
+      this.subscribeToTopic('/topic/gameplay-chat');
+
+      // Subscribe to free chat topic
+      this.subscribeToTopic('/topic/free-chat');
     });
 
     // Notify server that user has joined
