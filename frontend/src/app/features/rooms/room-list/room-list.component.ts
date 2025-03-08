@@ -30,15 +30,18 @@ export class RoomListComponent implements OnInit {
   }
 
   joinRoom(roomId: number) {
-    const playerId = this.authService.getCurrentUser()?.id;
+    const playerId = this.authService.getCurrentUserId();
     if (playerId) {
       this.roomService.joinRoom(roomId, playerId).subscribe({
-        next: (response) => {
-          console.log('Joined room:', response);
+        next: () => {
+          console.log('Joined room:', roomId);
           this.router.navigate(['/waiting-room', roomId]);
         },
         error: (err) => console.error('Failed to join room:', err)
       });
+    } else {
+      console.error('Player ID not found');
+      this.router.navigate(['/login']);
     }
   }
 }
