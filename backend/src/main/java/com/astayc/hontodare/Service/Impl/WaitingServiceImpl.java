@@ -4,6 +4,7 @@ import com.astayc.hontodare.DTO.WaitingDTO;
 import com.astayc.hontodare.Entity.Waiting;
 import com.astayc.hontodare.Repository.WaitingRepository;
 import com.astayc.hontodare.Service.WaitingService;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class WaitingServiceImpl implements WaitingService {
     }
 
     @Override
+    @Transactional
     public void leaveRoom(Long roomId, Long userId) {
         waitingRepository.deleteByRoomIdAndUserId(roomId, userId);
     }
