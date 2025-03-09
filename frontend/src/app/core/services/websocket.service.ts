@@ -121,6 +121,18 @@ export class WebSocketService {
     }
   }
 
+  sendLeaveRoomMessage(roomId: number, playerId: string): void {
+    if (this.stompClient) {
+      const leaveMessage = {
+        roomId: roomId,
+        playerId: playerId,
+        type: 'ROOM_LEAVE'
+      };
+      this.stompClient.send('/app/room.leave', {}, JSON.stringify(leaveMessage));
+      console.log(`Sent leave message for room ${roomId}`);
+    }
+  }
+
   subscribeToRoom(roomId: number): Subject<any> {
     const topic = `/topic/room/${roomId}`;
 

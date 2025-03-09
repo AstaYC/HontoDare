@@ -39,34 +39,23 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
       this.webSocketService.connect(playerId.toString(), this.roomId).then(() => {
         console.log('WebSocket connection established');
 
-        // Subscribe to match updates
-// In WaitingRoomComponent, update this subscription
+        // Single subscription - use subscribeToRoom
         this.roomSubscription = this.webSocketService
-            .subscribeToRoom(this.roomId)  // Use subscribeToRoom instead of subscribe
-            .subscribe((message: any) => {
-              console.log('Room update received:', message);
+          .subscribeToRoom(this.roomId)
+          .subscribe((message: any) => {
+            console.log('Room update received:', message);
 
-              if (message.type === 'MATCH_CREATED') {
-                console.log('Match created, navigating to game');
-                this.router.navigate(['/game', this.roomId]);
-              } else if (message.type === 'PLAYER_JOINED') {
-                this.loadRoomUsers();
-              }
-            });
-        // Subscribe to room-specific updates
-        this.roomSubscription = this.webSocketService.subscribe(`/topic/room/${this.roomId}`).subscribe((message: any) => {
-          if (message.type === 'PLAYER_JOINED') {
-            console.log('Player joined:', message.playerId);
-            this.loadRoomUsers();
-          } else if (message.type === 'PLAYER_LEFT') {
-            console.log('Player left:', message.playerId);
-            this.loadRoomUsers();
-          }
-        }, (error: any) => {
-          console.error(`Room subscription for room ${this.roomId} failed:`, error);
-        });
+            if (message.type === 'MATCH_CREATED') {
+              console.log('Match created, navigating to game');
+              this.router.navigate(['/game', this.roomId]);
+            } else if (message.type === 'PLAYER_JOINED') {
+              console.log('Player joined:', message.playerId);
+              this.loadRoomUsers();
+            }
+          });
 
         // Join the room
+        this.webSocketService.sendJoinRoomMessage(this.roomId, playerId.toString());
       }).catch((error: any) => {
         console.error('WebSocket connection failed:', error);
       });
@@ -98,6 +87,10 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
   leaveRoom() {
     const playerId = this.authService.getCurrentUserId();
     if (playerId) {
+      // Send WebSocket message first
+      this.webSocketService.sendLeaveRoomMessage(this.roomId, playerId.toString());
+
+      // Then call the REST API
       this.roomService.leaveRoom(this.roomId, playerId).subscribe({
         next: () => {
           console.log('Left room:', this.roomId);
