@@ -75,8 +75,7 @@ export class WebSocketService {
         const socket = new this.SockJS(`${environment.apiUrl}/ws`);
         this.stompClient = this.Stomp.over(socket);
 
-        // Disable debug logs from STOMP
-        this.stompClient.debug = null;
+        this.stompClient.debug = () => {};
 
         this.stompClient.connect({}, () => {
           console.log('Connected to WebSocket');
