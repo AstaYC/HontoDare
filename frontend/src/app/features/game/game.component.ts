@@ -5,7 +5,7 @@ import { WebSocketService } from '../../core/services/websocket.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
-import {FormsModule} from "@angular/forms";
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-game',
@@ -22,6 +22,7 @@ export class GameComponent implements OnInit, OnDestroy {
   freeChatInput: string = '';
   gameplaySubscription!: Subscription;
   freeChatSubscription!: Subscription;
+  matchUpdatesSubscription!: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,11 +43,27 @@ export class GameComponent implements OnInit, OnDestroy {
     // Subscribe to gameplay chat messages
     this.gameplaySubscription = this.webSocketService.subscribe('/topic/gameplay-chat').subscribe((message: any) => {
       this.gameplayMessages.push(message);
+    }, (error: any) => {
+      console.error('Gameplay chat subscription failed:', error);
     });
 
     // Subscribe to free chat messages
     this.freeChatSubscription = this.webSocketService.subscribe('/topic/free-chat').subscribe((message: any) => {
       this.freeChatMessages.push(message);
+    }, (error: any) => {
+      console.error('Free chat subscription failed:', error);
+    });
+
+    // Subscribe to match updates to handle any disconnections or reconnections
+    this.matchUpdatesSubscription = this.webSocketService.subscribe('/topic/match-updates').subscribe((message: any) => {
+      const matchData = message;
+      if (matchData.roomId === this.roomId && matchData.players.length !== 2) {
+        console.log('Match no longer valid, redirecting to waiting room...');
+        this.webSocketService.disconnect();
+        this.router.navigate(['/waiting-room', this.roomId]);
+      }
+    }, (error: any) => {
+      console.error('Match updates subscription failed:', error);
     });
   }
 
@@ -70,6 +87,9 @@ export class GameComponent implements OnInit, OnDestroy {
     }
     if (this.freeChatSubscription) {
       this.freeChatSubscription.unsubscribe();
+    }
+    if (this.matchUpdatesSubscription) {
+      this.matchUpdatesSubscription.unsubscribe();
     }
     this.webSocketService.disconnect();
   }

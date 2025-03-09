@@ -50,6 +50,6 @@ public class JwtUtil {
 
     public String getRole(String token) {
         Claims claims = extractClaims(token);
-        return claims.get("role", String.class); // Corrected to "role" instead of "roles"
+        return claims.get("role", String.class);
     }
 }

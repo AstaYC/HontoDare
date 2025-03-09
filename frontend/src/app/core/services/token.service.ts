@@ -50,7 +50,7 @@ export class TokenService {
     const token = this.getToken();
     if (token) {
       const decodedToken = this.getDecodedToken(token);
-      return decodedToken?.role || null; // Corrected to "role" instead of "roles"
+      return decodedToken?.role || null;
     }
     return null;
   }

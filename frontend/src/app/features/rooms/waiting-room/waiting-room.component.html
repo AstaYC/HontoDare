@@ -6,7 +6,9 @@
     <div class="mt-4">
       <h3 class="text-lg font-medium text-gray-900">Players in Room:</h3>
       <ul class="list-disc pl-6">
-        <li *ngFor="let player of players">{{ player.userId }}</li>
+        <li *ngFor="let player of players">
+          {{ player.username || player.name || 'Player ' + player.userId }}
+        </li>
       </ul>
     </div>
     <div class="flex justify-center">

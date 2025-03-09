@@ -1,11 +1,11 @@
 // src/app/features/rooms/waiting-room/waiting-room.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { RoomService } from '../../../core/services/room.service';
+import { WebSocketService } from '../../../core/services/websocket.service';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { WebSocketService } from '../../../core/services/websocket.service';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -15,39 +15,50 @@ import { RouterLink } from '@angular/router';
   templateUrl: './waiting-room.component.html',
   styleUrls: ['./waiting-room.component.css']
 })
-export class WaitingRoomComponent implements OnInit {
+export class WaitingRoomComponent implements OnInit, OnDestroy {
   roomId!: number;
   players: any[] = [];
-  subscription!: Subscription;
   matchSubscription!: Subscription;
 
-
   constructor(
-    private route: ActivatedRoute,
-    private authService: AuthService,
-    private roomService: RoomService,
-    private webSocketService: WebSocketService,
-    private router: Router
+      private route: ActivatedRoute,
+      private authService: AuthService,
+      private roomService: RoomService,
+      private webSocketService: WebSocketService,
+      private router: Router
   ) {}
 
-  ngOnInit() {
+// src/app/features/rooms/waiting-room/waiting-room.component.ts
+  async ngOnInit() {
     this.roomId = parseInt(this.route.snapshot.paramMap.get('id') || '0', 10);
-    this.joinRoom();
     this.loadRoomUsers();
 
-    // Connect to WebSocket
+    // Connect to WebSocket with roomId
     const playerId = this.authService.getCurrentUserId();
     if (playerId) {
-      this.webSocketService.connect(playerId.toString());
-    }
+      try {
+        // Connect to WebSocket and wait for it to complete
+        await this.webSocketService.connect(playerId.toString(), this.roomId);
+        console.log('WebSocket connected successfully');
 
-    // Listen for match updates
-    this.matchSubscription = this.webSocketService.subscribe('/topic/match-updates').subscribe((message: any) => {
-      const matchData = message;
-      if (matchData.roomId === this.roomId && matchData.players.length === 2) {
-        this.router.navigate(['/game', this.roomId]);
+        // Subscribe to room updates
+        this.matchSubscription = this.webSocketService
+            .subscribeToRoom(this.roomId)
+            .subscribe((message: any) => {
+              console.log('Room update received:', message);
+
+              if (message.type === 'MATCH_CREATED') {
+                console.log('Match created, navigating to game');
+                this.router.navigate(['/game', this.roomId]);
+              } else if (message.type === 'PLAYER_JOINED') {
+                this.loadRoomUsers();
+              }
+            });
+
+      } catch (err) {
+        console.error('Failed to connect to WebSocket:', err);
       }
-    });
+    }
   }
 
   joinRoom() {

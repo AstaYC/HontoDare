@@ -9,6 +9,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WaitingDTO {
+    private Long id;
     private Long roomId;
     private Long userId;
     private java.sql.Timestamp joinedAt;

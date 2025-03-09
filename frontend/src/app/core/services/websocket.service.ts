@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,44 +21,111 @@ export class WebSocketService {
   constructor(@Inject(PLATFORM_ID) private platformId: any) {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
-    // Only load these libraries in browser context
     if (this.isBrowser) {
-      // Use dynamic imports to avoid SSR issues
-      import('@stomp/stompjs').then(stompModule => {
+      // Load libraries synchronously to avoid race conditions
+      Promise.all([
+        import('@stomp/stompjs'),
+        import('sockjs-client')
+      ]).then(([stompModule, sockJSModule]) => {
         this.Stomp = stompModule.Stomp;
-      });
-
-      import('sockjs-client').then(sockJSModule => {
         this.SockJS = sockJSModule.default;
+        console.log('Both WebSocket libraries loaded successfully');
+      }).catch(err => {
+        console.error('Failed to load WebSocket libraries:', err);
       });
     }
   }
 
-  connect(username: string): void {
-    if (!this.isBrowser || !this.Stomp || !this.SockJS) {
-      console.log('WebSocket not available in this environment or libraries not loaded yet');
-      return;
+  connect(username: string, roomId?: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.isBrowser) {
+        console.log('WebSocket not available in non-browser environment');
+        reject('Not in browser');
+        return;
+      }
+
+      // Set a timeout for library loading
+      let libraryTimeout: any = null;
+      let attempts = 0;
+
+      const waitForLibraries = async (): Promise<void> => {
+        attempts++;
+
+        if (attempts > 50) { // Try for ~5 seconds max
+          clearTimeout(libraryTimeout);
+          reject('Timed out waiting for WebSocket libraries to load');
+          return;
+        }
+
+        if (!this.Stomp || !this.SockJS) {
+          console.log(`Waiting for WebSocket libraries to load... (attempt ${attempts})`);
+          libraryTimeout = setTimeout(waitForLibraries, 100);
+          return;
+        }
+
+        clearTimeout(libraryTimeout);
+
+        try {
+          this.username = username;
+          const socket = new this.SockJS(`${environment.apiUrl}/ws`);
+          this.stompClient = this.Stomp.over(socket);
+
+          this.stompClient.connect({}, () => {
+            console.log('Connected to WebSocket');
+
+            // Subscribe to general topics
+            this.subscribeToTopic('/topic/public');
+            this.subscribeToTopic('/topic/match-updates');
+
+            // Subscribe to room-specific topic if roomId is provided
+            if (roomId) {
+              this.subscribeToTopic(`/topic/room/${roomId}`);
+            }
+
+            // Notify server that user has joined
+            if (roomId) {
+              this.sendJoinRoomMessage(roomId, username);
+            } else {
+              this.sendMessage('', 'JOIN');
+            }
+
+            // Resolve the promise now that we're connected
+            resolve();
+          }, (error: any) => {
+            console.error('WebSocket connection failed:', error);
+            reject(error);
+          });
+        } catch (error) {
+          console.error('Error establishing WebSocket connection:', error);
+          reject(error);
+        }
+      };
+
+      waitForLibraries();
+    });
+  }
+  sendJoinRoomMessage(roomId: number, playerId: string): void {
+    if (this.stompClient) {
+      const joinMessage = {
+        roomId: roomId,
+        playerId: playerId,
+        type: 'ROOM_JOIN'
+      };
+      this.stompClient.send('/app/room.join', {}, JSON.stringify(joinMessage));
+      console.log(`Sent join message for room ${roomId}`);
+    }
+  }
+  subscribeToRoom(roomId: number): Subject<any> {
+    const topic = `/topic/room/${roomId}`;
+
+    if (!this.messageSubjects.has(topic)) {
+      const subject = new Subject<any>();
+      this.messageSubjects.set(topic, subject);
     }
 
-    this.username = username;
-    const socket = new this.SockJS(`${environment.apiUrl}/ws`);
-    this.stompClient = this.Stomp.over(socket);
-
-    this.stompClient.connect({}, () => {
-      console.log('Connected to WebSocket');
-
-      // Subscribe to public chat topic
-      this.subscribeToTopic('/topic/public');
-
-      // Subscribe to gameplay chat topic
-      this.subscribeToTopic('/topic/gameplay-chat');
-
-      // Subscribe to free chat topic
-      this.subscribeToTopic('/topic/free-chat');
-
-      // Notify server that user has joined
-      this.sendMessage('', 'JOIN');
-    });
+    // Return the subject immediately, it will receive messages
+    // once the connection completes in the connect() method
+    return this.messageSubjects.get(topic)!;
   }
 
   sendMessage(content: string, type: string): void {
@@ -82,6 +150,8 @@ export class WebSocketService {
       // Only subscribe if client is available
       if (this.stompClient) {
         this.subscribeToClient(topic, subject);
+      } else {
+        console.log(`StompClient not available for topic ${topic}`);
       }
     }
 
@@ -89,9 +159,14 @@ export class WebSocketService {
   }
 
   private subscribeToClient(topic: string, subject: Subject<any>): void {
+    if (!this.stompClient) return;
+
     this.stompClient.subscribe(topic, (message: any) => {
       const parsedMessage = JSON.parse(message.body);
+      console.log(`Received message on topic ${topic}:`, parsedMessage);
       subject.next(parsedMessage);
+    }, (error: any) => {
+      console.error(`Subscription to topic ${topic} failed:`, error);
     });
   }
 
