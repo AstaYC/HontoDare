@@ -29,35 +29,29 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
   ) {}
 
 // src/app/features/rooms/waiting-room/waiting-room.component.ts
-  async ngOnInit() {
+// src/app/features/rooms/waiting-room/waiting-room.component.ts
+  ngOnInit() {
     this.roomId = parseInt(this.route.snapshot.paramMap.get('id') || '0', 10);
     this.loadRoomUsers();
 
-    // Connect to WebSocket with roomId
+    // Connect to WebSocket
     const playerId = this.authService.getCurrentUserId();
     if (playerId) {
-      try {
-        // Connect to WebSocket and wait for it to complete
-        await this.webSocketService.connect(playerId.toString(), this.roomId);
-        console.log('WebSocket connected successfully');
+      this.webSocketService.connect(playerId.toString(), this.roomId).then(() => {
+        console.log('WebSocket connection established');
 
-        // Subscribe to room updates
-        this.matchSubscription = this.webSocketService
-            .subscribeToRoom(this.roomId)
-            .subscribe((message: any) => {
-              console.log('Room update received:', message);
-
-              if (message.type === 'MATCH_CREATED') {
-                console.log('Match created, navigating to game');
-                this.router.navigate(['/game', this.roomId]);
-              } else if (message.type === 'PLAYER_JOINED') {
-                this.loadRoomUsers();
-              }
-            });
-
-      } catch (err) {
-        console.error('Failed to connect to WebSocket:', err);
-      }
+        // Listen for match updates
+        this.matchSubscription = this.webSocketService.subscribe(`/topic/room/${this.roomId}`).subscribe((message: any) => {
+          if (message.type === 'MATCH_CREATED' && message.players.length === 2) {
+            console.log('Players matched:', message.players);
+            this.router.navigate(['/game', this.roomId]);
+          }
+        }, (error: any) => {
+          console.error('Match subscription failed:', error);
+        });
+      }).catch((error: any) => {
+        console.error('WebSocket connection failed:', error);
+      });
     }
   }
 
