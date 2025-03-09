@@ -17,7 +17,6 @@ export const routes: Routes = [
   { path: 'rooms', component: RoomListComponent, canActivate: [AuthGuard] },
   { path: 'waiting-room/:id', component: WaitingRoomComponent, canActivate: [AuthGuard] },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '**', redirectTo: '/login' }
 ];
 
 @NgModule({
