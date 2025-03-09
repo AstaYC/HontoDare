@@ -17,7 +17,7 @@ export const routes: Routes = [
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'rooms', component: RoomListComponent, canActivate: [AuthGuard] },
   { path: 'waiting-room/:id', component: WaitingRoomComponent, canActivate: [AuthGuard] },
-  { path: 'game', component: GameComponent, canActivate: [AuthGuard] },
+  { path: 'game/:id', component: GameComponent, canActivate: [AuthGuard] },
 
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];

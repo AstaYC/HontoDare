@@ -6,5 +6,5 @@ public enum MessageType {
     LEAVE,
     GAMEPLAY_CHAT,
     FREE_CHAT,
-    MATCH
+    MATCH,
 }

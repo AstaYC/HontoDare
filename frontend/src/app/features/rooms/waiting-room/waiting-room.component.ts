@@ -19,6 +19,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
   roomId!: number;
   players: any[] = [];
   matchSubscription!: Subscription;
+  roomSubscription!: Subscription;
 
   constructor(
       private route: ActivatedRoute,
@@ -28,8 +29,6 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
       private router: Router
   ) {}
 
-// src/app/features/rooms/waiting-room/waiting-room.component.ts
-// src/app/features/rooms/waiting-room/waiting-room.component.ts
   ngOnInit() {
     this.roomId = parseInt(this.route.snapshot.paramMap.get('id') || '0', 10);
     this.loadRoomUsers();
@@ -40,15 +39,34 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
       this.webSocketService.connect(playerId.toString(), this.roomId).then(() => {
         console.log('WebSocket connection established');
 
-        // Listen for match updates
-        this.matchSubscription = this.webSocketService.subscribe(`/topic/room/${this.roomId}`).subscribe((message: any) => {
-          if (message.type === 'MATCH_CREATED' && message.players.length === 2) {
-            console.log('Players matched:', message.players);
-            this.router.navigate(['/game', this.roomId]);
+        // Subscribe to match updates
+// In WaitingRoomComponent, update this subscription
+        this.roomSubscription = this.webSocketService
+            .subscribeToRoom(this.roomId)  // Use subscribeToRoom instead of subscribe
+            .subscribe((message: any) => {
+              console.log('Room update received:', message);
+
+              if (message.type === 'MATCH_CREATED') {
+                console.log('Match created, navigating to game');
+                this.router.navigate(['/game', this.roomId]);
+              } else if (message.type === 'PLAYER_JOINED') {
+                this.loadRoomUsers();
+              }
+            });
+        // Subscribe to room-specific updates
+        this.roomSubscription = this.webSocketService.subscribe(`/topic/room/${this.roomId}`).subscribe((message: any) => {
+          if (message.type === 'PLAYER_JOINED') {
+            console.log('Player joined:', message.playerId);
+            this.loadRoomUsers();
+          } else if (message.type === 'PLAYER_LEFT') {
+            console.log('Player left:', message.playerId);
+            this.loadRoomUsers();
           }
         }, (error: any) => {
-          console.error('Match subscription failed:', error);
+          console.error(`Room subscription for room ${this.roomId} failed:`, error);
         });
+
+        // Join the room
       }).catch((error: any) => {
         console.error('WebSocket connection failed:', error);
       });
@@ -69,7 +87,10 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
 
   loadRoomUsers() {
     this.roomService.getRoomUsers(this.roomId).subscribe({
-      next: (users) => this.players = users,
+      next: (users) => {
+        this.players = users;
+        console.log('Loaded room users:', this.players);
+      },
       error: (err) => console.error('Failed to load room users:', err)
     });
   }
@@ -91,6 +112,9 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.matchSubscription) {
       this.matchSubscription.unsubscribe();
+    }
+    if (this.roomSubscription) {
+      this.roomSubscription.unsubscribe();
     }
     this.webSocketService.disconnect();
   }
