@@ -12,6 +12,7 @@ import com.astayc.hontodare.Util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -50,14 +51,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(LoginDTO loginDTO) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword())
-        );
+        String email = loginDTO.getEmail();
+        String password = loginDTO.getPassword();
 
-        User user = userRepository.findByEmail(loginDTO.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
+        // Find and authenticate user
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new HontoDareException("Invalid email or password", HttpStatus.UNAUTHORIZED));
 
-        return jwtUtil.generateToken(user.getId() , user.getRole().toString());
+        // Verify password
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new HontoDareException("Invalid email or password", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Generate and return JWT token
+        return jwtUtil.generateToken(user.getId(), user.getRole().toString());
     }
 
     @Override
