@@ -18,7 +18,7 @@ export class WebSocketService {
   private messageSubjects: Map<string, Subject<any>> = new Map();
 
   constructor(@Inject(PLATFORM_ID) private platformId: any) {
-    this.isBrowser = isPlatformBrowser(platformId);
+    this.isBrowser = isPlatformBrowser(this.platformId);
 
     // Only load these libraries in browser context
     if (this.isBrowser) {

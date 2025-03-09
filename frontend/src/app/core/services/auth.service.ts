@@ -29,7 +29,9 @@ export class AuthService {
         if (response) {
           this.tokenService.saveToken(response);
           const userRole = this.tokenService.getUserRole();
-          localStorage.setItem('role', userRole || '');
+          if (userRole) {
+            localStorage.setItem('role', userRole);
+          }
           this.isAuthenticatedSubject.next(true);
         }
       }),
@@ -65,17 +67,19 @@ export class AuthService {
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
       tap(() => {
-        this.tokenService.removeToken();
+        this.tokenService.clearToken();
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('role');
         this.isAuthenticatedSubject.next(false);
+        this.router.navigate(['/login']);
       }),
       catchError(error => {
         console.error('Logout failed', error);
-        this.tokenService.removeToken();
+        this.tokenService.clearToken();
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('role');
         this.isAuthenticatedSubject.next(false);
+        this.router.navigate(['/login']);
         return of(null);
       })
     );
@@ -101,6 +105,9 @@ export class AuthService {
     return this.tokenService.getUserId();
   }
 
+  isAuthenticated(): boolean {
+    return !!this.tokenService.getToken();
+  }
 
   private errorMessage: string = '';
 }

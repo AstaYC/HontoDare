@@ -34,7 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             if (jwtUtil.validateToken(token)) {
                 Long userId = jwtUtil.getUserId(token);
-                String role = jwtUtil.getRoles(token);
+                String role = jwtUtil.getRole(token);
 
                 // Create authentication token
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -43,6 +43,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                System.err.println("Invalid token: " + token);
             }
         }
         chain.doFilter(request, response);

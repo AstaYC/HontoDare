@@ -52,7 +52,7 @@ export class LoginComponent {
           }else if (this.tokenService.getUserRole() === 'EMPLOYEE'){
             this.router.navigate(['/employee/dashboard']);
           } else{
-            this.router.navigate(['/home']);
+            this.router.navigate(['/rooms']);
           }
         } else {
           this.errorMessage = 'Login failed. Please check your credentials';

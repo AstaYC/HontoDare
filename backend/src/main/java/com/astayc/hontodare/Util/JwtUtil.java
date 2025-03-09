@@ -28,7 +28,6 @@ public class JwtUtil {
         }
     }
 
-
     public Claims extractClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(SECRET_KEY)
@@ -49,8 +48,8 @@ public class JwtUtil {
         return extractClaims(token).get("userId", Long.class);
     }
 
-    public String getRoles(String token) {
+    public String getRole(String token) {
         Claims claims = extractClaims(token);
-        return claims.get("roles").toString();
+        return claims.get("role", String.class); // Corrected to "role" instead of "roles"
     }
 }
