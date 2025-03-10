@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,6 +16,8 @@ export class WebSocketService {
   private SockJS: any;
   private librariesLoaded = false;
   private librariesLoadingPromise: Promise<void> | null = null;
+  private activeConnectionsByUser: Map<string, Set<number>> = new Map();
+
 
   // Subjects for message streams
   private messageSubjects: Map<string, Subject<any>> = new Map();
@@ -55,6 +58,14 @@ export class WebSocketService {
       return Promise.reject('Not in browser');
     }
 
+    if (roomId) {
+      const userRooms = this.activeConnectionsByUser.get(username) || new Set();
+      if (userRooms.has(roomId)) {
+        console.warn(`User ${username} is already connected to room ${roomId}`);
+        return Promise.reject('User already connected to this room');
+      }
+    }
+
     // Ensure libraries are loaded before trying to connect
     if (!this.librariesLoaded) {
       try {
@@ -79,6 +90,14 @@ export class WebSocketService {
 
         this.stompClient.connect({}, () => {
           console.log('Connected to WebSocket');
+
+          // Track this connection
+          if (roomId) {
+            const userRooms = this.activeConnectionsByUser.get(username) || new Set();
+            userRooms.add(roomId);
+            this.activeConnectionsByUser.set(username, userRooms);
+            console.log(`Tracking connection for user ${username} in room ${roomId}`);
+          }
 
           // Subscribe to general topics
           this.subscribeToTopic('/topic/public');
@@ -158,6 +177,16 @@ export class WebSocketService {
 
   disconnect(): void {
     if (this.stompClient && this.stompClient.connected) {
+      // Remove tracking for this user/room
+      if (this.username) {
+        const userRooms = this.activeConnectionsByUser.get(this.username);
+        if (userRooms) {
+          // Remove all room associations for this user
+          this.activeConnectionsByUser.delete(this.username);
+          console.log(`Removed connection tracking for user ${this.username}`);
+        }
+      }
+
       this.stompClient.disconnect();
       console.log('Disconnected from WebSocket');
     }
@@ -204,5 +233,18 @@ export class WebSocketService {
         subject.next(parsedMessage);
       }
     });
+  }
+
+  sendChatMessage(content: string, type: string, sender: string, roomId?: number): void {
+    if (this.stompClient) {
+      const chatMessage = {
+        sender: sender,
+        content: content,
+        type: type,
+        roomId: roomId
+      };
+      this.stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
+      console.log(`Sent ${type} message to room ${roomId}`);
+    }
   }
 }

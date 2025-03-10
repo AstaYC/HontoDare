@@ -93,7 +93,6 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
       // Then call the REST API
       this.roomService.leaveRoom(this.roomId, playerId).subscribe({
         next: () => {
-          console.log('Left room:', this.roomId);
           this.webSocketService.disconnect();
           this.router.navigate(['/rooms']);
         },

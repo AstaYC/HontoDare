@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RoomService } from '../../core/services/room.service';
 
 @Component({
   selector: 'app-game',
@@ -23,61 +24,151 @@ export class GameComponent implements OnInit, OnDestroy {
   gameplaySubscription!: Subscription;
   freeChatSubscription!: Subscription;
   matchUpdatesSubscription!: Subscription;
+  playerId: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private authService: AuthService,
+    private roomService: RoomService,
     private webSocketService: WebSocketService,
     private router: Router
   ) {}
 
   ngOnInit() {
     this.roomId = parseInt(this.route.snapshot.paramMap.get('id') || '0', 10);
+    const userId = this.authService.getCurrentUserId();
 
-    // Connect to WebSocket
-    const playerId = this.authService.getCurrentUserId();
-    if (playerId) {
-      this.webSocketService.connect(playerId.toString());
+    if (userId) {
+      this.playerId = userId.toString();
+      console.log('Player ID:', this.playerId);
+      console.log('Room ID:', this.roomId);
+
+      this.webSocketService.connect(this.playerId, this.roomId).then(() => {
+        console.log('Connected to WebSocket for game');
+
+// Subscribe to room-specific gameplay chat
+        this.gameplaySubscription = this.webSocketService
+          .subscribe(`/topic/room/${this.roomId}/gameplay`)
+          .subscribe({
+            next: (message: any) => {
+              console.log('Received gameplay message:', message);
+
+              // Check if this message already exists in the array
+              const isDuplicate = this.gameplayMessages.some(m =>
+                m.sender === message.sender &&
+                m.content === message.content &&
+                m.type === message.type
+              );
+
+              if (!isDuplicate) {
+                this.gameplayMessages.push(message);
+              }
+            },
+            error: (error) => console.error('Gameplay subscription error:', error)
+          });
+
+// Subscribe to room-specific free chat
+        this.freeChatSubscription = this.webSocketService
+          .subscribe(`/topic/room/${this.roomId}/free`)
+          .subscribe({
+            next: (message: any) => {
+              console.log('Received free chat message:', message);
+
+              // Check if this message already exists in the array
+              const isDuplicate = this.freeChatMessages.some(m =>
+                m.sender === message.sender &&
+                m.content === message.content &&
+                m.type === message.type
+              );
+
+              if (!isDuplicate) {
+                this.freeChatMessages.push(message);
+              }
+            },
+            error: (error) => console.error('Free chat subscription error:', error)
+          });
+
+        // Also subscribe to general room updates
+        this.matchUpdatesSubscription = this.webSocketService
+          .subscribeToRoom(this.roomId)
+          .subscribe({
+            next: (message: any) => {
+              console.log('Game room update received:', message);
+
+              if (message.type === 'PLAYER_LEFT') {
+                alert('Your opponent has left the game');
+              }
+            },
+            error: (error) => console.error('Room updates subscription error:', error)
+          });
+
+      }).catch(error => {
+        console.error('Failed to connect to WebSocket:', error);
+
+        if (error === 'User already connected to this room') {
+          alert('You are already connected to this game in another window or tab.');
+          this.router.navigate(['/rooms']);
+          return;
+        }
+      });
+    } else {
+      console.error('No user ID available');
+      this.router.navigate(['/login']);
     }
-
-    // Subscribe to gameplay chat messages
-    this.gameplaySubscription = this.webSocketService.subscribe('/topic/gameplay-chat').subscribe((message: any) => {
-      this.gameplayMessages.push(message);
-    }, (error: any) => {
-      console.error('Gameplay chat subscription failed:', error);
-    });
-
-    // Subscribe to free chat messages
-    this.freeChatSubscription = this.webSocketService.subscribe('/topic/free-chat').subscribe((message: any) => {
-      this.freeChatMessages.push(message);
-    }, (error: any) => {
-      console.error('Free chat subscription failed:', error);
-    });
-
-    // Subscribe to match updates to handle any disconnections or reconnections
-    this.matchUpdatesSubscription = this.webSocketService.subscribe('/topic/match-updates').subscribe((message: any) => {
-      const matchData = message;
-      if (matchData.roomId === this.roomId && matchData.players.length !== 2) {
-        console.log('Match no longer valid, redirecting to waiting room...');
-        this.webSocketService.disconnect();
-        this.router.navigate(['/waiting-room', this.roomId]);
-      }
-    }, (error: any) => {
-      console.error('Match updates subscription failed:', error);
-    });
   }
 
   sendGameplayQuestion() {
-    if (this.questionInput.trim()) {
-      this.webSocketService.sendMessage(this.questionInput, 'GAMEPLAY_CHAT');
+    console.log('Sending gameplay question:', this.questionInput);
+    if (this.questionInput.trim() && this.playerId) {
+      this.webSocketService.sendChatMessage(
+        this.questionInput,
+        'GAMEPLAY_CHAT',
+        this.playerId,
+        this.roomId
+      );
+      // // Add the message locally for immediate feedback
+      // this.gameplayMessages.push({
+      //   sender: this.playerId,
+      //   content: this.questionInput,
+      //   type: 'GAMEPLAY_CHAT'
+      // });
       this.questionInput = '';
     }
   }
 
   sendFreeChatMessage() {
-    if (this.freeChatInput.trim()) {
-      this.webSocketService.sendMessage(this.freeChatInput, 'FREE_CHAT');
+    console.log('Sending free chat message:', this.freeChatInput);
+    if (this.freeChatInput.trim() && this.playerId) {
+      this.webSocketService.sendChatMessage(
+        this.freeChatInput,
+        'FREE_CHAT',
+        this.playerId,
+        this.roomId
+      );
+      // Add the message locally for immediate feedback
+      // this.freeChatMessages.push({
+      //   sender: this.playerId,
+      //   content: this.freeChatInput,
+      //   type: 'FREE_CHAT'
+      // });
       this.freeChatInput = '';
+    }
+  }
+
+  leaveGame() {
+    const playerId = this.authService.getCurrentUserId();
+    if (playerId) {
+      // Send WebSocket message first
+      this.webSocketService.sendLeaveRoomMessage(this.roomId, playerId.toString());
+
+        this.roomService.leaveRoom(this.roomId, playerId).subscribe({
+        next: () => {
+          console.log('Left room:', this.roomId);
+          this.webSocketService.disconnect();
+          this.router.navigate(['/rooms']);
+        },
+        error: (err) => console.error('Failed to leave room:', err)
+      });
     }
   }
 
@@ -91,6 +182,8 @@ export class GameComponent implements OnInit, OnDestroy {
     if (this.matchUpdatesSubscription) {
       this.matchUpdatesSubscription.unsubscribe();
     }
+
+    // Ensure we disconnect from WebSocket
     this.webSocketService.disconnect();
   }
 }
