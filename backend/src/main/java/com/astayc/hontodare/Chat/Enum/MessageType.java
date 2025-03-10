@@ -7,4 +7,5 @@ public enum MessageType {
     GAMEPLAY_CHAT,
     FREE_CHAT,
     MATCH,
+    ROOM_LEAVE
 }

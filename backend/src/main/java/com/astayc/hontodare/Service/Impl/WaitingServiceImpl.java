@@ -8,6 +8,7 @@ import com.astayc.hontodare.Chat.ChatMessage;
 import com.astayc.hontodare.Chat.Enum.MessageType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class WaitingServiceImpl implements WaitingService {
 
@@ -33,6 +35,20 @@ public class WaitingServiceImpl implements WaitingService {
 
     @Override
     public void joinRoom(Long roomId, Long userId) {
+        // Check if the user is already in the room
+        if (waitingRepository.existsByRoomIdAndUserId(roomId, userId)) {
+            log.info("User {} is already in room {}", userId, roomId);
+            return; // User is already in the room, do nothing
+        }
+
+        List<Waiting> userWaitings = waitingRepository.findByUserId(userId);
+        if (!userWaitings.isEmpty()) {
+            log.info("User {} is already in another room", userId);
+            // Either return or remove from previous rooms first
+            userWaitings.forEach(w -> waitingRepository.deleteById(w.getId()));
+        }
+
+        // User is not in the room, add them
         Waiting waiting = new Waiting(roomId, userId);
         waitingRepository.save(waiting);
 

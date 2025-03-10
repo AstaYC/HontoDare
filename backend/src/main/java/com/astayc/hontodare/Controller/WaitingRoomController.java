@@ -32,6 +32,7 @@ public class WaitingRoomController {
 
         log.info("Player {} joined room {}", playerId, roomId);
 
+
         // Store user info in WebSocket session
         headerAccessor.getSessionAttributes().put("username", playerId);
         headerAccessor.getSessionAttributes().put("roomId", roomId);
@@ -62,6 +63,36 @@ public class WaitingRoomController {
             );
 
             messagingTemplate.convertAndSend("/topic/room/" + roomId, matchCreatedMessage);
+        }
+    }
+
+    @MessageMapping("/room.leave")
+    public void leaveRoom(@Payload Map<String, Object> leaveMessage,
+                          SimpMessageHeaderAccessor headerAccessor) {
+        Long roomId = ((Number) leaveMessage.get("roomId")).longValue();
+        String playerId = (String) leaveMessage.get("playerId");
+
+        log.info("Player {} left room {}", playerId, roomId);
+
+        // Remove player from room
+        Set<String> players = roomPlayers.get(roomId);
+        if (players != null) {
+            players.remove(playerId);
+
+            // If room is empty, remove it
+            if (players.isEmpty()) {
+                roomPlayers.remove(roomId);
+            }
+
+            // Notify room that player left
+            Map<String, Object> playerLeftMessage = Map.of(
+                    "type", "PLAYER_LEFT",
+                    "playerId", playerId,
+                    "roomId", roomId,
+                    "playerCount", players.size()
+            );
+
+            messagingTemplate.convertAndSend("/topic/room/" + roomId, playerLeftMessage);
         }
     }
 }

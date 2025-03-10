@@ -22,7 +22,7 @@ public class Waiting {
     @Column(nullable = false)
     private Long roomId;
 
-    @Column(nullable = false)
+    @Column(unique = true)
     private Long userId;
 
     @Column(nullable = false, updatable = false)

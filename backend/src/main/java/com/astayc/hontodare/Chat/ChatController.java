@@ -2,6 +2,7 @@ package com.astayc.hontodare.Chat;
 
 import com.astayc.hontodare.Chat.ChatMessage;
 import com.astayc.hontodare.Chat.Enum.MessageType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -10,6 +11,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
+@Slf4j
+
 public class ChatController {
 
     @Autowired
@@ -20,16 +23,31 @@ public class ChatController {
         String sender = chatMessage.getSender();
         String content = chatMessage.getContent();
         MessageType type = chatMessage.getType();
+        Long roomId = chatMessage.getRoomId();
 
+        // Log the incoming message
+        log.info("Chat message received: type={}, sender={}, roomId={}", type, sender, roomId);
+
+        // Send message to the appropriate destination based on type and roomId
         switch (type) {
             case CHAT:
                 messagingTemplate.convertAndSend("/topic/public", chatMessage);
                 break;
             case GAMEPLAY_CHAT:
-                messagingTemplate.convertAndSend("/topic/gameplay-chat", chatMessage);
+                // If roomId is present, send to room-specific topic
+                if (roomId != null) {
+                    messagingTemplate.convertAndSend("/topic/room/" + roomId + "/gameplay", chatMessage);
+                } else {
+                    messagingTemplate.convertAndSend("/topic/gameplay-chat", chatMessage);
+                }
                 break;
             case FREE_CHAT:
-                messagingTemplate.convertAndSend("/topic/free-chat", chatMessage);
+                // If roomId is present, send to room-specific topic
+                if (roomId != null) {
+                    messagingTemplate.convertAndSend("/topic/room/" + roomId + "/free", chatMessage);
+                } else {
+                    messagingTemplate.convertAndSend("/topic/free-chat", chatMessage);
+                }
                 break;
             default:
                 throw new IllegalArgumentException("Unknown message type: " + type);

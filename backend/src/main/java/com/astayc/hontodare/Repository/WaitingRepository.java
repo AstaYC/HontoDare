@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     List<Waiting> findByRoomId(Long roomId);
     void deleteByRoomIdAndUserId(Long roomId, Long userId);
+    boolean existsByRoomIdAndUserId(Long roomId, Long userId);
+    List<Waiting> findByUserId(Long userId);
 }
