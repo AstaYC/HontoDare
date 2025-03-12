@@ -28,4 +28,12 @@ public class Character {
 
     @Column(nullable = false)
     private String glance;
+
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "roomId")
+    private Room room;
 }

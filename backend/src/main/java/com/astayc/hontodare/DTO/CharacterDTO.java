@@ -15,4 +15,6 @@ public class CharacterDTO {
     private String category;
     private String picUrl;
     private String glance;
+    private Long userId;
+    private Long roomId;
 }

@@ -52,4 +52,11 @@ public class CharacterServiceImpl implements CharacterService {
     public void deleteCharacter(Long id) {
         characterRepository.deleteById(id);
     }
+
+    @Override
+    public CharacterDTO getCharacterById(Long id) {
+        Character character = characterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Character not found"));
+        return modelMapper.map(character, CharacterDTO.class);
+    }
 }
