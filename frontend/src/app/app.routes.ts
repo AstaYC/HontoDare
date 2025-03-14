@@ -18,6 +18,12 @@ export const routes: Routes = [
   { path: 'rooms', component: RoomListComponent, canActivate: [AuthGuard] },
   { path: 'waiting-room/:id', component: WaitingRoomComponent, canActivate: [AuthGuard] },
   { path: 'game/:id', component: GameComponent, canActivate: [AuthGuard] },
+  {
+    path: 'character-upload/:id',
+    loadComponent: () => import('./features/character/character-upload.component')
+      .then(m => m.CharacterUploadComponent),
+    canActivate: [AuthGuard]
+  },
 
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];

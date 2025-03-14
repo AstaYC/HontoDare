@@ -43,14 +43,17 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         this.roomSubscription = this.webSocketService
           .subscribeToRoom(this.roomId)
           .subscribe((message: any) => {
-            console.log('Room update received:', message);
+            console.log('Room message received:', message);
 
-            if (message.type === 'MATCH_CREATED') {
-              console.log('Match created, navigating to game');
-              this.router.navigate(['/game', this.roomId]);
-            } else if (message.type === 'PLAYER_JOINED') {
+            if (message.type === 'PLAYER_JOINED') {
               console.log('Player joined:', message.playerId);
               this.loadRoomUsers();
+            } else if (message.type === 'PLAYER_LEFT') {
+              console.log('Player left:', message.playerId);
+              this.loadRoomUsers();
+            } else if (message.type === 'MATCH_CREATED') {
+              console.log('Match created, redirecting to character upload');
+              this.router.navigate(['/character-upload', this.roomId]);
             }
           });
 

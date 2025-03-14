@@ -87,7 +87,7 @@ public class CharacterController {
                 characterDTO.setPicUrl("/uploads/" + fileName);
             }
 
-            // Save character
+//             Save character
             CharacterDTO savedCharacter = characterService.createCharacter(characterDTO);
 
             // Track this upload

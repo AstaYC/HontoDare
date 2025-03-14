@@ -105,12 +105,13 @@ export class GameComponent implements OnInit, OnDestroy {
       }).catch(error => {
         console.error('Failed to connect to WebSocket:', error);
 
-        if (error === 'User already connected to this room') {
-          alert('You are already connected to this game in another window or tab.');
-          this.router.navigate(['/rooms']);
-          return;
-        }
+        // if (error === 'User already connected to this room') {
+        //   alert('You are already connected to this game in another window or tab.');
+        //   this.router.navigate(['/rooms']);
+        //   return;
+        // }
       });
+
     } else {
       console.error('No user ID available');
       this.router.navigate(['/login']);

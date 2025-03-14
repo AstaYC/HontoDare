@@ -17,6 +17,10 @@ export class WebSocketService {
   private librariesLoaded = false;
   private librariesLoadingPromise: Promise<void> | null = null;
   private activeConnectionsByUser: Map<string, Set<number>> = new Map();
+  private characterUploads: Map<number, Set<string>> = new Map();
+  private connected: boolean = false;
+
+
 
 
   // Subjects for message streams
@@ -54,28 +58,20 @@ export class WebSocketService {
 
   async connect(username: string, roomId?: number): Promise<void> {
     if (!this.isBrowser) {
-      console.log('WebSocket not available in non-browser environment');
       return Promise.reject('Not in browser');
     }
 
-    if (roomId) {
-      const userRooms = this.activeConnectionsByUser.get(username) || new Set();
-      if (userRooms.has(roomId)) {
-        console.warn(`User ${username} is already connected to room ${roomId}`);
-        return Promise.reject('User already connected to this room');
-      }
+    if (this.stompClient?.connected) {
+      return Promise.resolve();
     }
 
-    // Ensure libraries are loaded before trying to connect
     if (!this.librariesLoaded) {
       try {
-        // Wait for libraries to load with a more reasonable timeout
         await Promise.race([
           this.librariesLoadingPromise,
           new Promise((_, reject) => setTimeout(() => reject('Timed out waiting for WebSocket libraries to load'), 10000))
         ]);
       } catch (error) {
-        console.error('WebSocket libraries loading failed:', error);
         return Promise.reject(error);
       }
     }
@@ -85,44 +81,23 @@ export class WebSocketService {
         this.username = username;
         const socket = new this.SockJS(`${environment.apiUrl}/ws`);
         this.stompClient = this.Stomp.over(socket);
-
         this.stompClient.debug = () => {};
 
         this.stompClient.connect({}, () => {
-          console.log('Connected to WebSocket');
-
-          // Track this connection
-          if (roomId) {
-            const userRooms = this.activeConnectionsByUser.get(username) || new Set();
-            userRooms.add(roomId);
-            this.activeConnectionsByUser.set(username, userRooms);
-            console.log(`Tracking connection for user ${username} in room ${roomId}`);
-          }
-
-          // Subscribe to general topics
+          this.connected = true;
           this.subscribeToTopic('/topic/public');
           this.subscribeToTopic('/topic/match-updates');
-
-          // Subscribe to room-specific topic if roomId is provided
           if (roomId) {
             this.subscribeToTopic(`/topic/room/${roomId}`);
-          }
-
-          // Notify server that user has joined
-          if (roomId) {
             this.sendJoinRoomMessage(roomId, username);
-          } else {
-            this.sendMessage('', 'JOIN');
           }
-
-          // Resolve the promise now that we're connected
           resolve();
         }, (error: any) => {
-          console.error('WebSocket connection failed:', error);
+          this.connected = false;
           reject(error);
         });
       } catch (error) {
-        console.error('Error establishing WebSocket connection:', error);
+        this.connected = false;
         reject(error);
       }
     });
@@ -178,14 +153,14 @@ export class WebSocketService {
   disconnect(): void {
     if (this.stompClient && this.stompClient.connected) {
       // Remove tracking for this user/room
-      if (this.username) {
-        const userRooms = this.activeConnectionsByUser.get(this.username);
-        if (userRooms) {
-          // Remove all room associations for this user
-          this.activeConnectionsByUser.delete(this.username);
-          console.log(`Removed connection tracking for user ${this.username}`);
-        }
-      }
+      // if (this.username) {
+      //   const userRooms = this.activeConnectionsByUser.get(this.username);
+      //   if (userRooms) {
+      //     // Remove all room associations for this user
+      //     this.activeConnectionsByUser.delete(this.username);
+      //     console.log(`Removed connection tracking for user ${this.username}`);
+      //   }
+      // }
 
       this.stompClient.disconnect();
       console.log('Disconnected from WebSocket');
@@ -235,16 +210,84 @@ export class WebSocketService {
     });
   }
 
-  sendChatMessage(content: string, type: string, sender: string, roomId?: number): void {
-    if (this.stompClient) {
-      const chatMessage = {
-        sender: sender,
-        content: content,
-        type: type,
-        roomId: roomId
-      };
-      this.stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
-      console.log(`Sent ${type} message to room ${roomId}`);
+  // sendChatMessage(content: string, type: string, sender: string, roomId?: number): void {
+  //   if (this.stompClient) {
+  //     const chatMessage = {
+  //       sender: sender,
+  //       content: content,
+  //       type: type,
+  //       roomId: roomId
+  //     };
+  //     this.stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
+  //     console.log(`Sent ${type} message to room ${roomId}`);
+  //   }
+  // }
+
+  isConnected(): boolean {
+    return this.stompClient?.connected || false;
+  }
+
+  async sendChatMessage(content: string, type: string, sender: string, roomId?: number): Promise<void> {
+    if (!this.isConnected()) {
+      try {
+        await this.connect(sender, roomId);
+      } catch (error) {
+        console.error('Failed to reconnect:', error);
+        throw error;
+      }
     }
+
+    const chatMessage = {
+      sender: sender,
+      content: content,
+      type: type,
+      roomId: roomId
+    };
+
+    this.stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
+    console.log(`Sent ${type} message to room ${roomId}`);
+  }
+
+  async trackCharacterUpload(roomId: number, playerId: string) {
+    try {
+      await this.ensureConnection(playerId, roomId);
+
+      if (!this.characterUploads.has(roomId)) {
+        this.characterUploads.set(roomId, new Set());
+      }
+      const uploads = this.characterUploads.get(roomId)!;
+      uploads.add(playerId);
+
+      // Check if both players have uploaded
+      if (uploads.size === 2) {
+        // Send ALL_PLAYERS_UPLOADED message through WebSocket
+        const message = {
+          type: 'ALL_PLAYERS_UPLOADED',
+          roomId: roomId,
+          content: 'Both players have uploaded their characters'
+        };
+
+        // Send to specific room topic to ensure all players receive it
+        this.stompClient.send(`/app/room/${roomId}.state`, {}, JSON.stringify(message));
+        console.log('Sent ALL_PLAYERS_UPLOADED message');
+      }
+    } catch (error) {
+      console.error('Error in trackCharacterUpload:', error);
+      throw error;
+    }
+  }
+
+  private async ensureConnection(username: string, roomId?: number): Promise<void> {
+    if (!this.isConnected()) {
+      await this.connect(username, roomId);
+    }
+  }
+
+  getUploadCount(roomId: number): number {
+    return this.characterUploads.get(roomId)?.size || 0;
+  }
+
+  clearUploads(roomId: number) {
+    this.characterUploads.delete(roomId);
   }
 }
