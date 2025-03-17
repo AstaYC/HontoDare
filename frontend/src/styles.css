@@ -1,3 +1,136 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: "KillTheNoise";
+  src: url("/assets/fonts/Kill The Noise.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SamuraiBlast';
+  src: url('/assets/fonts/SamuraiBlast-8MnyD.otf') format('opentype'),
+  url('/assets/fonts/SamuraiBlast-YznGj.ttf') format('truetype'),
+  url('/assets/fonts/SamuraiBlast.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Main font utility class */
+.font-samurai {
+  font-family: 'SamuraiBlast', Impact, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 80% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 80% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 80% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 60% 30%;
+    --input: 0 0% 15%;
+    --ring: 0 80% 50%;
+    --radius: 0rem;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 80% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 80% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 80% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 60% 30%;
+    --input: 0 0% 15%;
+    --ring: 0 80% 50%;
+  }
+}
+
+.font-kill-the-noise {
+  font-family: "KillTheNoise", Impact, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+}
+
+/* Navigation styles inspired by the provided template */
+.main-menu {
+  background-color: rgba(0, 0, 0, 0.9);
+  border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+/* Dropdown menu animations */
+.group:hover .group-hover\:block {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

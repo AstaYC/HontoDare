@@ -1,0 +1,78 @@
+<header class="main-menu">
+  <div class="container mx-auto px-4">
+    <div class="flex items-center justify-between py-4">
+      <a routerLink="/" class="navbar-brand">
+        <h1 class="font-kill-the-noise text-3xl text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400 transform -skew-x-12">
+          HontoDare
+        </h1>
+      </a>
+
+      <nav class="hidden md:flex">
+        <ul class="flex space-x-8">
+          <li>
+            <a routerLink="/" routerLinkActive="text-red-500" [routerLinkActiveOptions]="{exact: true}" class="font-samurai text-white hover:text-red-500 transition-colors">Home</a>
+          </li>
+          <li>
+            <a routerLink="/fighter" routerLinkActive="text-red-500" class="font-samurai text-white hover:text-red-500 transition-colors">Fighter</a>
+          </li>
+          <li>
+            <a routerLink="/team" routerLinkActive="text-red-500" class="font-samurai text-white hover:text-red-500 transition-colors">Team</a>
+          </li>
+          <li class="relative group">
+            <a routerLink="/blog" routerLinkActive="text-red-500" class="font-samurai text-white hover:text-red-500 transition-colors flex items-center">
+              Blog <i class="fas fa-chevron-down ml-1 text-xs"></i>
+            </a>
+            <div class="absolute left-0 mt-2 w-48 bg-gray-900 border border-red-900 shadow-lg hidden group-hover:block z-10">
+              <a routerLink="/blog" class="block px-4 py-2 text-white hover:bg-red-900 transition-colors">Blog</a>
+              <a routerLink="/blog/single" class="block px-4 py-2 text-white hover:bg-red-900 transition-colors">Single Blog</a>
+            </div>
+          </li>
+          <li class="relative group">
+            <a href="#" class="font-samurai text-white hover:text-red-500 transition-colors flex items-center">
+              Pages <i class="fas fa-chevron-down ml-1 text-xs"></i>
+            </a>
+            <div class="absolute left-0 mt-2 w-48 bg-gray-900 border border-red-900 shadow-lg hidden group-hover:block z-10">
+              <a routerLink="/elements" class="block px-4 py-2 text-white hover:bg-red-900 transition-colors">Elements</a>
+            </div>
+          </li>
+          <li>
+            <a routerLink="/contact" routerLinkActive="text-red-500" class="font-samurai text-white hover:text-red-500 transition-colors">Contact</a>
+          </li>
+        </ul>
+      </nav>
+
+      <a routerLink="/profile" class="font-samurai bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white py-2 px-6">
+        Profile
+      </a>
+
+      <button class="md:hidden text-white" (click)="toggleMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div *ngIf="isMenuOpen" class="md:hidden bg-gray-900 border-t border-red-900">
+    <ul class="py-2">
+      <li>
+        <a routerLink="/" routerLinkActive="text-red-500" [routerLinkActiveOptions]="{exact: true}" class="block px-4 py-2 text-white hover:text-red-500 transition-colors">Home</a>
+      </li>
+      <li>
+        <a routerLink="/fighter" routerLinkActive="text-red-500" class="block px-4 py-2 text-white hover:text-red-500 transition-colors">Fighter</a>
+      </li>
+      <li>
+        <a routerLink="/team" routerLinkActive="text-red-500" class="block px-4 py-2 text-white hover:text-red-500 transition-colors">Team</a>
+      </li>
+      <li>
+        <a routerLink="/blog" routerLinkActive="text-red-500" class="block px-4 py-2 text-white hover:text-red-500 transition-colors">Blog</a>
+      </li>
+      <li>
+        <a routerLink="/elements" class="block px-4 py-2 text-white hover:text-red-500 transition-colors">Elements</a>
+      </li>
+      <li>
+        <a routerLink="/contact" routerLinkActive="text-red-500" class="block px-4 py-2 text-white hover:text-red-500 transition-colors">Contact</a>
+      </li>
+    </ul>
+  </div>
+</header>
+

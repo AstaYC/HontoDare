@@ -1,0 +1,29 @@
+.main-menu {
+  background-color: rgba(0, 0, 0, 0.9);
+  border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+/* Dropdown menu animations */
+.group:hover .group-hover\:block {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
