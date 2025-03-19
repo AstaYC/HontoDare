@@ -1,23 +1,114 @@
 <!-- src/app/features/rooms/waiting-room/waiting-room.component.html -->
-<div class="flex justify-center items-center h-screen bg-gray-100">
-  <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md space-y-6">
-    <h2 class="text-2xl font-semibold text-gray-700 text-center">Waiting Room</h2>
-    <p class="text-gray-600 text-center">Please wait for another player to join...</p>
-    <div class="mt-4">
-      <h3 class="text-lg font-medium text-gray-900">Players in Room:</h3>
-      <ul class="list-disc pl-6">
-        <li *ngFor="let player of players">
-          {{ player.username || player.name || 'Player ' + player.userId }}
-        </li>
-      </ul>
+<div class="min-h-screen bg-black text-white py-16 flex items-center justify-center">
+  <div class="container mx-auto px-4 max-w-4xl">
+    <div class="bg-gray-900 border-2 border-red-600 relative overflow-hidden">
+      <!-- Decorative elements -->
+      <div class="absolute top-0 right-0 w-32 h-32 bg-red-600 transform rotate-45 translate-x-16 -translate-y-16 opacity-20"></div>
+      <div class="absolute bottom-0 left-0 w-32 h-32 bg-red-800 transform -rotate-12 -translate-x-16 translate-y-8 opacity-10"></div>
+
+      <!-- Header -->
+      <div class="relative z-10 p-8 border-b border-red-900">
+        <h2 class="font-kill-the-noise text-4xl text-center text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400 transform -skew-x-12 mb-4">
+          WAITING ROOM
+        </h2>
+        <div class="h-1 w-48 mx-auto bg-red-600 mb-6"></div>
+
+        <!-- Room info -->
+        <div class="flex flex-col md:flex-row items-center justify-between">
+          <div class="mb-4 md:mb-0 text-center md:text-left">
+            <p class="text-gray-500 text-sm">ROOM ID</p>
+            <p class="font-samurai text-red-500 text-xl">#{{roomId}}</p>
+          </div>
+
+          <div class="text-center animate-pulse">
+            <div class="inline-flex items-center justify-center">
+              <div class="h-3 w-3 bg-red-500 rounded-full mr-2"></div>
+              <p class="font-samurai text-gray-300">WAITING FOR PLAYERS</p>
+              <div class="h-3 w-3 bg-red-500 rounded-full ml-2"></div>
+            </div>
+            <p class="text-gray-500 text-sm mt-1">Match will start when 2 players join</p>
+          </div>
+
+          <div class="mt-4 md:mt-0 text-center md:text-right">
+            <p class="text-gray-500 text-sm">PLAYERS</p>
+            <p class="font-samurai text-red-500 text-xl">{{players.length}}/2</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Players section -->
+      <div class="p-8 relative z-10">
+        <h3 class="font-kill-the-noise text-2xl text-red-500 mb-6 transform -skew-x-6">
+          <i class="fas fa-users mr-2"></i> PLAYERS IN BATTLE
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <!-- Current players -->
+          <div *ngFor="let player of players; let i = index"
+               class="bg-gray-800 border border-red-700 p-4 flex items-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-red-800 to-red-600 rounded-full flex items-center justify-center mr-4 text-white font-bold">
+              {{player.username?.charAt(0) || player.name?.charAt(0) || 'P'}}
+            </div>
+            <div>
+              <p class="font-samurai text-white">
+                {{ player.username || player.name || 'Player ' + player.userId }}
+              </p>
+              <p class="text-gray-500 text-xs">
+                <i class="fas fa-circle text-green-500 mr-1"></i> READY
+              </p>
+            </div>
+            <div class="ml-auto">
+              <i class="fas fa-crown text-yellow-500" *ngIf="i === 0"></i>
+            </div>
+          </div>
+
+          <!-- Empty slots -->
+          <div *ngFor="let empty of [].constructor(2 - players.length)"
+               class="bg-gray-800 border border-gray-700 p-4 flex items-center opacity-50">
+            <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mr-4 text-gray-500">
+              <i class="fas fa-user-slash"></i>
+            </div>
+            <div>
+              <p class="font-samurai text-gray-500">Waiting for player...</p>
+              <p class="text-gray-600 text-xs">
+                <i class="fas fa-circle text-gray-600 mr-1"></i> NOT CONNECTED
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Battle preparation animation -->
+        <div *ngIf="players.length > 1" class="mb-8">
+          <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-red-600 to-red-400 w-full animate-progress"></div>
+          </div>
+          <p class="text-center text-gray-400 mt-2 font-samurai">
+            PREPARING BATTLE...
+          </p>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex justify-center">
+          <button
+            (click)="leaveRoom()"
+            class="py-3 px-8 font-kill-the-noise bg-gradient-to-r from-red-800 to-red-600 hover:from-red-900 hover:to-red-700 text-white border-0 transition-all duration-300 transform hover:translate-y-[-2px] flex items-center justify-center"
+          >
+            <i class="fas fa-door-open mr-2"></i> LEAVE BATTLE
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="flex justify-center">
-      <button
-        (click)="leaveRoom()"
-        class="py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-500 transition duration-300 ease-in-out"
-      >
-        Leave Room
-      </button>
+
+    <!-- Floating decorative elements -->
+    <div class="absolute top-20 left-10 animate-float-slow hidden lg:block">
+      <div class="w-24 h-24 rounded-full bg-gradient-to-r from-red-800 to-red-600 shadow-lg shadow-red-900/50 flex items-center justify-center opacity-20">
+        <i class="fas fa-swords text-white text-3xl"></i>
+      </div>
+    </div>
+    <div class="absolute bottom-20 right-10 animate-float hidden lg:block">
+      <div class="w-32 h-32 rounded-full bg-gradient-to-r from-red-600 to-red-500 shadow-lg shadow-red-900/50 flex items-center justify-center opacity-20">
+        <i class="fas fa-dragon text-white text-4xl"></i>
+      </div>
     </div>
   </div>
 </div>

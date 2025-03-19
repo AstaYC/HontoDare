@@ -4,7 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { RoomService } from '../../../core/services/room.service';
 import { WebSocketService } from '../../../core/services/websocket.service';
-import { Subscription } from 'rxjs';
+import { Subscription, interval } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -20,18 +21,21 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
   players: any[] = [];
   matchSubscription!: Subscription;
   roomSubscription!: Subscription;
+  timerSubscription!: Subscription;
+  waitingTime = 0; // Time in seconds
 
   constructor(
-      private route: ActivatedRoute,
-      private authService: AuthService,
-      private roomService: RoomService,
-      private webSocketService: WebSocketService,
-      private router: Router
+    private route: ActivatedRoute,
+    private authService: AuthService,
+    private roomService: RoomService,
+    private webSocketService: WebSocketService,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.roomId = parseInt(this.route.snapshot.paramMap.get('id') || '0', 10);
     this.loadRoomUsers();
+    this.startWaitingTimer();
 
     // Connect to WebSocket
     const playerId = this.authService.getCurrentUserId();
@@ -63,6 +67,19 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
         console.error('WebSocket connection failed:', error);
       });
     }
+  }
+
+  startWaitingTimer() {
+    this.timerSubscription = interval(1000)
+      .subscribe(() => {
+        this.waitingTime++;
+      });
+  }
+
+  formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
 
   joinRoom() {
@@ -110,6 +127,9 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     }
     if (this.roomSubscription) {
       this.roomSubscription.unsubscribe();
+    }
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
     }
     this.webSocketService.disconnect();
   }

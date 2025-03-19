@@ -13,65 +13,8 @@ import { Subscription } from 'rxjs';
   selector: 'app-character-upload',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-      <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md space-y-6">
-        <h2 class="text-2xl font-semibold text-gray-700 text-center">Upload Your Character</h2>
-
-        <div class="text-center text-sm text-gray-600 mb-4">
-          Upload an image of a character for your opponent to guess
-        </div>
-
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Character Name</label>
-            <input [(ngModel)]="characterName"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                   placeholder="Enter character name" />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Character Image</label>
-            <input type="file"
-                   (change)="onFileSelected($event)"
-                   accept="image/*"
-                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none" />
-          </div>
-
-          <div *ngIf="imagePreview" class="mt-4">
-            <img [src]="imagePreview" alt="Selected character" class="max-h-40 mx-auto" />
-          </div>
-
-          <div *ngIf="uploadStatus" class="mt-4 text-center"
-               [ngClass]="{'text-green-500': uploadStatus === 'success', 'text-red-500': uploadStatus === 'error'}">
-            {{ statusMessage }}
-          </div>
-
-          <div *ngIf="isUploading" class="text-center text-gray-700">
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div class="bg-indigo-600 h-2.5 rounded-full" [style.width.%]="uploadProgress"></div>
-            </div>
-            <p class="mt-2">Uploading... {{ uploadProgress }}%</p>
-          </div>
-
-          <button (click)="uploadCharacter()"
-                  [disabled]="isUploading || !characterName || !selectedFile"
-                  class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 disabled:bg-gray-400">
-            Upload Character
-          </button>
-
-          <button (click)="leaveGame()"
-                  class="w-full mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500">
-            Leave Game
-          </button>
-
-          <p class="text-center text-sm text-gray-500">
-            Waiting for both players to upload their characters...
-          </p>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './character-upload.component.html',
+  styleUrls: ['./character-upload.component.css']
 })
 export class CharacterUploadComponent implements OnInit, OnDestroy {
   roomId!: number;
@@ -84,6 +27,7 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
   uploadStatus: 'success' | 'error' | null = null;
   statusMessage: string = '';
   roomSubscription?: Subscription;
+  dragActive: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -91,21 +35,46 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private authService: AuthService,
     private webSocketService: WebSocketService
-  ) {
-  }
+  ) {}
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.selectedFile = input.files[0];
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagePreview = reader.result as string;
-      };
-      reader.readAsDataURL(this.selectedFile);
+      this.createPreview(this.selectedFile);
     }
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragActive = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragActive = false;
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragActive = false;
+
+    if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+      this.selectedFile = event.dataTransfer.files[0];
+      this.createPreview(this.selectedFile);
+    }
+  }
+
+  createPreview(file: File) {
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   uploadCharacter() {
@@ -219,7 +188,6 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     }
   }
 
-
   async leaveGame() {
     if (confirm('Are you sure you want to leave the game? Your progress will be lost.')) {
       if (this.playerId) {
@@ -255,12 +223,10 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     }
   }
 
-
   ngOnDestroy() {
     // Clean up subscriptions
     if (this.roomSubscription) {
       this.roomSubscription.unsubscribe();
     }
   }
-
 }

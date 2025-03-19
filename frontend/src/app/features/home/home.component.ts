@@ -65,4 +65,23 @@ export class HomeComponent {
       description: "Climb the leaderboards and show off your character knowledge!",
     },
   ]
+
+  // Add this to your component class
+  openGameModal(event: Event): void {
+    event.preventDefault();
+    const modal = document.getElementById('gameModal');
+    const modalContent = modal?.querySelector('.modal-content') as HTMLElement;
+    const button = event.currentTarget as HTMLElement;
+
+    if (modal && modalContent) {
+      // Get button position
+      const buttonRect = button.getBoundingClientRect();
+
+      // Set initial position for animation
+      modalContent.style.transformOrigin = `center ${window.innerHeight - buttonRect.top}px`;
+
+      // Show modal
+      modal.classList.remove('hidden');
+    }
+  }
 }

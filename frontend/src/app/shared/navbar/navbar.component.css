@@ -1,3 +1,4 @@
+/* Navigation styles inspired by the provided template */
 .main-menu {
   background-color: rgba(0, 0, 0, 0.9);
   border-bottom: 1px solid rgba(255, 0, 0, 0.2);
@@ -9,6 +10,20 @@
 .navbar-brand {
   display: flex;
   align-items: center;
+}
+
+/* Logo styling */
+.navbar-brand img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* For responsive behavior */
+@media (max-width: 640px) {
+  .navbar-brand img {
+    max-height: 10vh;
+  }
 }
 
 /* Dropdown menu animations */
@@ -27,3 +42,4 @@
     transform: translateY(0);
   }
 }
+

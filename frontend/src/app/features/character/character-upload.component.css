@@ -1,0 +1,76 @@
+/* src/app/features/character/character-upload.component.css */
+
+/* Pulse animation for waiting indicators */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Button hover effects */
+button {
+  position: relative;
+  overflow: hidden;
+}
+
+button:not(:disabled)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+
+button:not(:disabled):hover::after {
+  left: 100%;
+}
+
+/* Drag and drop area animations */
+.border-dashed {
+  transition: all 0.3s ease;
+}
+
+.border-dashed:hover {
+  border-color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+}
+
+/* Input focus styles */
+input:focus {
+  outline: none;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+}
+
+/* Preview area styling */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+/* Progress bar animation */
+@keyframes progressGlow {
+  0% {
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+  }
+}
+
+.bg-gradient-to-r {
+  background-size: 200% 100%;
+  animation: progressGlow 2s infinite;
+}

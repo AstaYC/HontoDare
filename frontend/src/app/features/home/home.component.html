@@ -2,7 +2,7 @@
 <div class="min-h-screen bg-black text-white">
   <!-- Hero Section -->
   <section class="relative overflow-hidden">
-    <div class="absolute inset-0 bg-cover bg-center opacity-10" style="background-image: url('/assets/img/hero-bg.jpg')"></div>
+    <div class="absolute inset-0 bg-cover bg-center opacity-15" style="background-image: url('/assets/img/dragon killer.jpg')"></div>
     <!-- Red slash decorations -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
       <div class="absolute -top-20 -left-20 w-96 h-96 bg-red-600 rotate-12 opacity-20"></div>
@@ -13,9 +13,7 @@
     <div class="container mx-auto px-4 py-32 relative z-10">
       <div class="flex flex-col items-center text-center max-w-4xl mx-auto">
         <div class="relative">
-          <h1 class="font-kill-the-noise text-6xl md:text-7xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400 transform -skew-x-12">
-            HontoDare
-          </h1>
+          <img style="max-width: 400px; max-height: 250px; width: auto; height: auto;" src="assets/img/HontoDare.png" alt="HontoDare Logo">
           <div class="absolute -top-6 -right-6">
             <i class="fas fa-sword text-red-600 animate-pulse"></i>
           </div>
@@ -25,7 +23,7 @@
           THE ULTIMATE CHARACTER GUESSING BATTLEGROUND
         </p>
         <div class="flex flex-col sm:flex-row gap-4">
-          <a routerLink="/play" class=" font-kill-the-noise bg-gradient-to-r from-red-800 to-red-600 hover:from-red-900 hover:to-red-700 text-white border-0 rounded-none px-8 py-6 text-lg font-bold tracking-wider transform hover:translate-y-[-2px] transition-transform inline-block">
+          <a (click)="openGameModal($event)" class="font-kill-the-noise bg-gradient-to-r from-red-800 to-red-600 hover:from-red-900 hover:to-red-700 text-white border-0 rounded-none px-8 py-6 text-lg font-bold tracking-wider transform hover:translate-y-[-2px] transition-transform inline-block cursor-pointer">
             PLAY NOW
             <i class="fas fa-chevron-right ml-2"></i>
           </a>
@@ -38,13 +36,13 @@
 
     <!-- Floating characters -->
     <div class="absolute top-20 left-10 animate-float-slow hidden lg:block">
-      <div class="w-24 h-24 rounded-full bg-gradient-to-r from-red-800 to-red-600 shadow-lg shadow-red-900/50 flex items-center justify-center">
-        <img src="/assets/img/placeholder.jpg" alt="Character" class="rounded-full">
+      <div class="w-32 h-32 rounded-full bg-gradient-to-r from-red-600 to-red-500 shadow-lg shadow-red-900/50 flex items-center justify-center">
+        <img src="/assets/img/ninjaNastu.gif" alt="Character" class="rounded-full">
       </div>
     </div>
     <div class="absolute bottom-20 right-10 animate-float hidden lg:block">
       <div class="w-32 h-32 rounded-full bg-gradient-to-r from-red-600 to-red-500 shadow-lg shadow-red-900/50 flex items-center justify-center">
-        <img src="/assets/img/placeholder.jpg" alt="Character" class="rounded-full">
+        <img src="/assets/img/luffy.jpg" alt="Character" class="rounded-full">
       </div>
     </div>
   </section>
@@ -125,5 +123,81 @@
       </a>
     </div>
   </section>
+</div>
+
+
+<!-- Game Mode Selection Modal -->
+<div id="gameModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center hidden">
+  <div class="bg-gray-900 border-2 border-red-600 p-8 max-w-4xl w-full relative modal-content">
+    <!-- Close button -->
+    <button onclick="document.getElementById('gameModal').classList.add('hidden')"
+            class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors">
+      <i class="fas fa-times text-xl"></i>
+    </button>
+
+    <!-- Modal content -->
+    <h2 class="font-kill-the-noise text-4xl text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400 transform -skew-x-12">
+      SELECT GAME MODE
+    </h2>
+    <div class="h-1 w-48 mx-auto bg-red-600 mb-8"></div>
+
+    <!-- Game mode options -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Play Online -->
+      <div class="bg-gray-800 border border-red-600 rounded-none overflow-hidden hover:shadow-lg hover:shadow-red-900/30 transition-all duration-300 transform hover:scale-105 group">
+        <div class="h-32 bg-gradient-to-br from-red-900 to-black relative overflow-hidden">
+          <div class="absolute inset-0 opacity-30 bg-cover bg-center" style="background-image: url('/assets/img/texture-bg.jpg')"></div>
+          <div class="absolute top-0 right-0 w-20 h-20 bg-red-600 transform rotate-45 translate-x-8 -translate-y-8 opacity-50"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-globe text-white text-5xl group-hover:scale-110 transition-transform duration-300"></i>
+          </div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-kill-the-noise text-xl text-red-500 mb-2">PLAY ONLINE</h3>
+          <p class="font-samurai text-gray-400 text-sm mb-4">Join rooms with players from around the world</p>
+          <a routerLink="/rooms" class="font-kill-the-noise w-full py-2 px-4 bg-gradient-to-r from-red-800 to-red-600 hover:from-red-900 hover:to-red-700 text-white text-center block transition-colors">
+            JOIN ROOM <i class="fas fa-chevron-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Play vs Computer -->
+      <div class="bg-gray-800 border border-gray-700 rounded-none overflow-hidden opacity-70 cursor-not-allowed">
+        <div class="h-32 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden">
+          <div class="absolute inset-0 opacity-20 bg-cover bg-center" style="background-image: url('/assets/img/texture-bg.jpg')"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-robot text-gray-500 text-5xl"></i>
+          </div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-kill-the-noise text-xl text-gray-500 mb-2">PLAY VS COMPUTER</h3>
+          <p class="font-samurai text-gray-500 text-sm mb-4">Challenge our AI in single player mode</p>
+          <div class="w-full py-2 px-4 bg-gray-700 text-gray-400 text-center font-kill-the-noise">
+            COMING SOON
+          </div>
+        </div>
+      </div>
+
+      <!-- Play vs Friend -->
+      <div class="bg-gray-800 border border-gray-700 rounded-none overflow-hidden opacity-70 cursor-not-allowed">
+        <div class="h-32 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden">
+          <div class="absolute inset-0 opacity-20 bg-cover bg-center" style="background-image: url('/assets/img/texture-bg.jpg')"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-user-friends text-gray-500 text-5xl"></i>
+          </div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-kill-the-noise text-xl text-gray-500 mb-2">PLAY VS FRIEND</h3>
+          <p class="font-samurai text-gray-500 text-sm mb-4">Challenge a friend in a private match</p>
+          <div class="w-full py-2 px-4 bg-gray-700 text-gray-400 text-center font-kill-the-noise">
+            COMING SOON
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative element -->
+    <div class="h-1 w-full bg-gradient-to-r from-red-900 to-transparent mt-8"></div>
+  </div>
 </div>
 <app-footer></app-footer>
