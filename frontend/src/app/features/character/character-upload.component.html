@@ -30,6 +30,14 @@
                      placeholder="Enter character name" />
             </div>
 
+            <div class="mb-6">
+              <label class="block font-kill-the-noise text-red-500 mb-2">CHARACTER DESCRIPTION</label>
+              <textarea [(ngModel)]="characterGlance"
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 focus:border-red-600 text-white font-samurai h-24"
+                        placeholder="Provide a brief description or hint about the character"></textarea>
+              <p class="text-xs text-gray-500 mt-1">This will help other players when guessing this character</p>
+            </div>
+
             <!-- Drag & drop area -->
             <div
               [ngClass]="{'border-red-600 bg-red-900/20': dragActive, 'border-gray-700 bg-gray-800': !dragActive}"

@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
-import java.util.UUID;
 
 @Entity
 @Table(name = "game")
@@ -30,26 +29,26 @@ public class Game {
     private GameMode gameMode;
 
     @ManyToOne
-    @JoinColumn(name = "roomId", nullable = false)
+    @JoinColumn(name = "room_id", nullable = false)  // Changed from roomId
     private Room room;
 
     @ManyToOne
-    @JoinColumn(name = "player1Id", nullable = false)
+    @JoinColumn(name = "player1_id", nullable = false)  // Changed from player1Id
     private User player1;
 
     @ManyToOne
-    @JoinColumn(name = "player2Id", nullable = false)
+    @JoinColumn(name = "player2_id", nullable = false)  // Changed from player2Id
     private User player2;
 
     @ManyToOne
-    @JoinColumn(name = "winnerId")
+    @JoinColumn(name = "winner_id")  // Changed from winnerId
     private User winner;
 
     @ManyToOne
-    @JoinColumn(name = "character1Id", nullable = false)
+    @JoinColumn(name = "character1_id", nullable = false)  // Adjust based on actual DB column name
     private Character character1;
 
     @ManyToOne
-    @JoinColumn(name = "character2Id", nullable = false)
+    @JoinColumn(name = "character2_id", nullable = false)  // Adjust based on actual DB column name
     private Character character2;
 }

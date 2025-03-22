@@ -3,6 +3,10 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { Subject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { WebSocketSubject } from 'rxjs/webSocket';
+import { webSocket } from 'rxjs/webSocket';
+import { Observable } from 'rxjs';
 
 
 @Injectable({
@@ -19,6 +23,7 @@ export class WebSocketService {
   private activeConnectionsByUser: Map<string, Set<number>> = new Map();
   private characterUploads: Map<number, Set<string>> = new Map();
   private connected: boolean = false;
+  private apiUrl = environment.apiUrl;
 
 
 
@@ -26,7 +31,10 @@ export class WebSocketService {
   // Subjects for message streams
   private messageSubjects: Map<string, Subject<any>> = new Map();
 
-  constructor(@Inject(PLATFORM_ID) private platformId: any) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: any,
+    private http: HttpClient
+  ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
     if (this.isBrowser) {
@@ -260,15 +268,39 @@ export class WebSocketService {
 
       // Check if both players have uploaded
       if (uploads.size === 2) {
-        // Send ALL_PLAYERS_UPLOADED message through WebSocket
-        const message = {
-          type: 'ALL_PLAYERS_UPLOADED',
-          roomId: roomId,
-          content: 'Both players have uploaded their characters'
-        };
+        // Get all players who have uploaded
+        const players = Array.from(uploads);
 
-        // Send to specific room topic to ensure all players receive it
-        this.stompClient.send(`/app/room/${roomId}.state`, {}, JSON.stringify(message));
+        // Send a message indicating all players have uploaded
+        await this.sendChatMessage(
+          JSON.stringify({
+            message: 'All players have uploaded characters',
+            players: players
+          }),
+          'ALL_PLAYERS_UPLOADED',
+          playerId,
+          roomId
+        );
+        console.log('Sent ALL_PLAYERS_UPLOADED message with players:', players);
+
+
+        // This is where the new code should go - initialize the game
+        // Get the opponent ID from the players array
+        const currentUserId = playerId;
+        const opponentId = players.find(id => id !== currentUserId);
+
+        if (opponentId && currentUserId) {
+          // Initialize a new game in the database
+          this.trackGameStart(roomId, currentUserId, opponentId)
+            .then(() => {
+              console.log('Game initialized successfully');
+              // Continue with game start logic
+            })
+            .catch(error => {
+              console.error('Failed to initialize game:', error);
+            });
+        }
+
         console.log('Sent ALL_PLAYERS_UPLOADED message');
       }
     } catch (error) {
@@ -289,5 +321,33 @@ export class WebSocketService {
 
   clearUploads(roomId: number) {
     this.characterUploads.delete(roomId);
+  }
+
+
+  trackGameStart(roomId: number, player1Id: string, player2Id: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+
+      const gameData = {
+        roomId: roomId,
+        player1Id: Number(player1Id),
+        player2Id: Number(player2Id),
+        startTime: new Date().toISOString()
+      };
+
+      console.log('Sending game data:', gameData);  // Debug log
+
+      this.http.post(`${this.apiUrl}/api/game/start`, gameData)
+        .subscribe({
+          next: (response) => {
+            console.log('Game started successfully:', response);
+            localStorage.setItem(`game_${roomId}`, JSON.stringify(response));
+            resolve();
+          },
+          error: (error) => {
+            console.error('Failed to initialize game:', error);
+            reject(error);
+          }
+        });
+    });
   }
 }

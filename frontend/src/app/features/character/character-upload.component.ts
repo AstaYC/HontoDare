@@ -1,12 +1,10 @@
-// src/app/features/character/character-upload.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { WebSocketService } from '../../core/services/websocket.service';
 import { AuthService } from '../../core/services/auth.service';
+import { CharacterService } from '../../core/services/character.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -20,6 +18,7 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
   roomId!: number;
   playerId: string | null = null;
   characterName: string = '';
+  characterGlance: string = '';
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   isUploading: boolean = false;
@@ -32,7 +31,7 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient,
+    private characterService: CharacterService,
     private authService: AuthService,
     private webSocketService: WebSocketService
   ) {}
@@ -77,6 +76,8 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
   }
 
+  // In character-upload.component.ts, modify the uploadCharacter method
+
   uploadCharacter() {
     if (!this.selectedFile || !this.characterName) {
       this.uploadStatus = 'error';
@@ -92,7 +93,7 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     const characterData = {
       name: this.characterName,
       category: 'Game Upload',
-      glance: 'Character uploaded by player',
+      glance: this.characterGlance || 'Character uploaded by player',
       userId: Number(this.playerId),
       roomId: this.roomId
     };
@@ -107,7 +108,7 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
       }
     }, 300);
 
-    this.http.post(`${environment.apiUrl}/api/character/upload`, formData)
+    this.characterService.uploadCharacter(formData)
       .subscribe({
         next: async (response: any) => {
           clearInterval(progressInterval);
@@ -115,6 +116,11 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
           this.uploadProgress = 100;
           this.uploadStatus = 'success';
           this.statusMessage = 'Character uploaded successfully! Waiting for opponent...';
+
+          // Store the character ID in localStorage
+          if (response && response.id) {
+            localStorage.setItem(`character_${this.roomId}_${this.playerId}`, response.id);
+          }
 
           if (this.playerId) {
             try {
@@ -167,14 +173,41 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
                 break;
 
               case 'ALL_PLAYERS_UPLOADED':
-                this.statusMessage = 'Both players ready! Redirecting to game...';
-                if (this.roomSubscription) {
-                  this.roomSubscription.unsubscribe();
+                this.statusMessage = 'Both players ready! Initializing game...';
+                console.log(message.players);
+
+                // Get the opponent ID from the message or room data
+                if (message.players && Array.isArray(message.players)) {
+                  const opponentId = message.players.find((id: string) => id !== this.playerId);
+
+                // Initialize the game in the database
+                if (opponentId && this.playerId) {
+                  this.webSocketService.trackGameStart(this.roomId, this.playerId, opponentId)
+                    .then(() => {
+                      this.statusMessage = 'Game initialized! Redirecting to game...';
+
+                      if (this.roomSubscription) {
+                        this.roomSubscription.unsubscribe();
+                      }
+
+                      setTimeout(() => {
+                        this.router.navigate(['/game', this.roomId])
+                          .catch(err => console.error('Navigation error:', err));
+                      }, 1500);
+                    })
+                    .catch(error => {
+                      console.error('Failed to initialize game:', error);
+                      this.statusMessage = 'Error initializing game. Please refresh.';
+                    });
+                 }
+                } else {
+                  console.log('Players data not available in message, navigating directly to game');
+                  // Fallback if we can't get opponent ID
+                  setTimeout(() => {
+                    this.router.navigate(['/game', this.roomId])
+                      .catch(err => console.error('Navigation error:', err));
+                  }, 1500);
                 }
-                setTimeout(() => {
-                  this.router.navigate(['/game', this.roomId])
-                    .catch(err => console.error('Navigation error:', err));
-                }, 1500);
                 break;
             }
           },
@@ -187,7 +220,6 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
       this.uploadStatus = 'error';
     }
   }
-
   async leaveGame() {
     if (confirm('Are you sure you want to leave the game? Your progress will be lost.')) {
       if (this.playerId) {

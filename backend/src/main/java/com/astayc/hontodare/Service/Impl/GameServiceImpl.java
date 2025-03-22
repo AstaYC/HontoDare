@@ -52,4 +52,27 @@ public class GameServiceImpl implements GameService {
         Game updatedGame = gameRepository.save(existingGame);
         return modelMapper.map(updatedGame, GameDTO.class);
     }
+
+    @Override
+    public GameDTO getGameById(Long gameId) {
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Game not found with id: " + gameId));
+        return modelMapper.map(game, GameDTO.class);
+    }
+
+    @Override
+    public GameDTO getActiveGameByRoomId(Long roomId) {
+        // Find a game with the specified roomId and null endTime (meaning it's active)
+        Game game = gameRepository.findByRoomIdAndEndTimeIsNull(roomId)
+                .orElseThrow(() -> new RuntimeException("No active game found for room: " + roomId));
+        return modelMapper.map(game, GameDTO.class);
+    }
+
+    @Override
+    public List<GameDTO> getGamesByPlayerId(Long playerId) {
+        List<Game> games = gameRepository.findByPlayer1IdOrPlayer2Id(playerId, playerId);
+        return games.stream().map(game -> modelMapper.map(game, GameDTO.class)).collect(Collectors.toList());
+    }
+
+
 }
