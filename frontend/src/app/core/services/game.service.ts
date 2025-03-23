@@ -16,8 +16,8 @@ export class GameService {
   startGame(gameData: {
     roomId: number,
     player1Id: number,
-    player2Id: number,
     character1Id?: number,
+    player2Id: number,
     character2Id?: number,
     startTime?: Date
   }): Observable<any> {

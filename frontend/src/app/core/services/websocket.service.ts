@@ -7,6 +7,8 @@ import { HttpClient } from '@angular/common/http';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { webSocket } from 'rxjs/webSocket';
 import { Observable } from 'rxjs';
+import { GameService } from './game.service';
+
 
 
 @Injectable({
@@ -33,8 +35,10 @@ export class WebSocketService {
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
-    private http: HttpClient
-  ) {
+    private http: HttpClient,
+    private gameService: GameService
+
+) {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
     if (this.isBrowser) {
@@ -264,44 +268,35 @@ export class WebSocketService {
         this.characterUploads.set(roomId, new Set());
       }
       const uploads = this.characterUploads.get(roomId)!;
+      console.log(`Adding player ${playerId} to uploads for room ${roomId}`);
+      if (!playerId) {
+        console.error('Attempting to add undefined/null playerId to uploads');
+      }
       uploads.add(playerId);
+
+      console.log(`Player ${playerId} uploaded character for room ${roomId}`);
+      console.log(`Current uploads for room ${roomId}:`, Array.from(uploads));
 
       // Check if both players have uploaded
       if (uploads.size === 2) {
         // Get all players who have uploaded
         const players = Array.from(uploads);
+        console.log(`All ${players.length} players have uploaded characters:`, players);
 
-        // Send a message indicating all players have uploaded
+        // Send a message with players array in JSON format
+        const messageContent = {
+          message: 'All players have uploaded characters',
+          players: players
+        };
+
         await this.sendChatMessage(
-          JSON.stringify({
-            message: 'All players have uploaded characters',
-            players: players
-          }),
+          JSON.stringify(messageContent),
           'ALL_PLAYERS_UPLOADED',
           playerId,
           roomId
         );
-        console.log('Sent ALL_PLAYERS_UPLOADED message with players:', players);
 
-
-        // This is where the new code should go - initialize the game
-        // Get the opponent ID from the players array
-        const currentUserId = playerId;
-        const opponentId = players.find(id => id !== currentUserId);
-
-        if (opponentId && currentUserId) {
-          // Initialize a new game in the database
-          this.trackGameStart(roomId, currentUserId, opponentId)
-            .then(() => {
-              console.log('Game initialized successfully');
-              // Continue with game start logic
-            })
-            .catch(error => {
-              console.error('Failed to initialize game:', error);
-            });
-        }
-
-        console.log('Sent ALL_PLAYERS_UPLOADED message');
+        console.log('Sent ALL_PLAYERS_UPLOADED message with message content:', messageContent);
       }
     } catch (error) {
       console.error('Error in trackCharacterUpload:', error);
@@ -326,28 +321,53 @@ export class WebSocketService {
 
   trackGameStart(roomId: number, player1Id: string, player2Id: string): Promise<void> {
     return new Promise((resolve, reject) => {
+      // Retrieve character IDs from localStorage if available
+      const character1Id = localStorage.getItem(`character_${roomId}_${player1Id}`);
+      const character2Id = localStorage.getItem(`character_${roomId}_${player2Id}`);
 
+      console.log('Character IDs from localStorage:', {
+        character1Id,
+        character2Id,
+        player1Id,
+        player2Id,
+        roomId
+      });
+
+      // Create the game data with ALL required fields matching backend expectations
       const gameData = {
-        roomId: roomId,
+        roomId: Number(roomId),
         player1Id: Number(player1Id),
         player2Id: Number(player2Id),
-        startTime: new Date().toISOString()
+        character1Id: character1Id ? Number(character1Id) : 1,
+        character2Id: character2Id ? Number(character2Id) : 2,
+        startTime: new Date()
       };
 
-      console.log('Sending game data:', gameData);  // Debug log
+      console.log('Sending game data to backend:', gameData);
 
-      this.http.post(`${this.apiUrl}/api/game/start`, gameData)
-        .subscribe({
-          next: (response) => {
-            console.log('Game started successfully:', response);
-            localStorage.setItem(`game_${roomId}`, JSON.stringify(response));
-            resolve();
-          },
-          error: (error) => {
-            console.error('Failed to initialize game:', error);
-            reject(error);
-          }
-        });
+      this.gameService.startGame(gameData).subscribe({
+        next: (response) => {
+          console.log('Game created successfully in database:', response);
+          localStorage.setItem(`game_${roomId}`, JSON.stringify(response));
+          resolve();
+        },
+        error: (error) => {
+          console.error('Failed to create game in database:', error);
+          // Examine the error details
+          console.error('Error details:', {
+            status: error.status,
+            message: error.message,
+            error: error.error
+          });
+          // Despite error, resolve promise to continue game flow
+          resolve();
+        }
+      });
     });
   }
+
+  getCharacterUploadsForRoom(roomId: number): string[] {
+    return Array.from(this.characterUploads.get(roomId) || []);
+  }
+
 }

@@ -6,6 +6,8 @@ import { CharacterService } from '../../core/services/character.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { RoomService } from '../../core/services/room.service';
+
 
 @Component({
   selector: 'app-character-upload',
@@ -33,8 +35,10 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     private router: Router,
     private characterService: CharacterService,
     private authService: AuthService,
-    private webSocketService: WebSocketService
-  ) {}
+    private webSocketService: WebSocketService,
+    private roomService: RoomService
+
+) {}
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -117,23 +121,37 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
           this.uploadStatus = 'success';
           this.statusMessage = 'Character uploaded successfully! Waiting for opponent...';
 
-          // Store the character ID in localStorage
-          if (response && response.id) {
-            localStorage.setItem(`character_${this.roomId}_${this.playerId}`, response.id);
-          }
+          console.log('Character upload response:', response);
 
-          if (this.playerId) {
-            try {
-              await this.webSocketService.trackCharacterUpload(this.roomId, this.playerId);
-              await this.webSocketService.sendChatMessage(
-                'CHARACTER_UPLOADED',
-                'GAME_STATE',
-                this.playerId,
-                this.roomId
-              );
-            } catch (error) {
-              this.statusMessage = 'Upload complete but failed to notify opponent. Please refresh.';
+          // Check for character ID in different possible locations
+          const characterId = response.character?.id || response.id;
+
+          if (characterId) {
+            const storageKey = `character_${this.roomId}_${this.playerId}`;
+            localStorage.setItem(storageKey, characterId.toString());
+            console.log(`Character ID ${characterId} stored in localStorage with key: ${storageKey}`);
+
+            // Verify storage worked
+            const storedValue = localStorage.getItem(storageKey);
+            console.log(`Verification - value retrieved from localStorage: ${storedValue}`);
+
+            if (this.playerId) {
+              try {
+                await this.webSocketService.sendChatMessage(
+                  JSON.stringify({
+                    characterId: characterId
+                  }),
+                  'CHARACTER_UPLOADED',
+                  this.playerId,
+                  this.roomId
+                );
+                await this.webSocketService.trackCharacterUpload(this.roomId, this.playerId);
+              } catch (error) {
+                this.statusMessage = 'Upload complete but failed to notify opponent. Please refresh.';
+              }
             }
+          } else {
+            console.error('Could not find character ID in response:', response);
           }
         },
         error: (error) => {
@@ -158,68 +176,93 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
   }
 
   private async initializeWebSocket() {
+    console.log('Current localStorage state:', {
+      characterIdForPlayer: localStorage.getItem(`character_${this.roomId}_${this.playerId}`),
+      playerId: this.playerId,
+      roomId: this.roomId
+    });
     try {
+      // Ensure we're connected to WebSocket
       await this.webSocketService.connect(this.playerId!, this.roomId);
+
       this.roomSubscription = this.webSocketService.subscribeToRoom(this.roomId)
         .subscribe({
           next: (message: any) => {
+            console.log('Received message:', message);
+
             switch (message.type) {
               case 'CHARACTER_UPLOADED':
-                if (message.playerId !== this.playerId) {
-                  this.webSocketService.trackCharacterUpload(this.roomId, message.playerId)
+                if (message.sender !== this.playerId) {
+                  this.webSocketService.trackCharacterUpload(this.roomId, message.sender)
                     .catch(error => console.error('Failed to track opponent upload:', error));
                   this.statusMessage = 'Your opponent has uploaded their character!';
                 }
                 break;
 
+              // In character-upload.component.ts, update the ALL_PLAYERS_UPLOADED case
               case 'ALL_PLAYERS_UPLOADED':
                 this.statusMessage = 'Both players ready! Initializing game...';
-                console.log(message.players);
 
-                // Get the opponent ID from the message or room data
-                if (message.players && Array.isArray(message.players)) {
-                  const opponentId = message.players.find((id: string) => id !== this.playerId);
+                // Use RoomService to get room users instead of WebSocket message content
+                this.roomService.getRoomUsers(this.roomId).subscribe({
+                  next: (users) => {
+                    console.log('Room users from API:', users);
 
-                // Initialize the game in the database
-                if (opponentId && this.playerId) {
-                  this.webSocketService.trackGameStart(this.roomId, this.playerId, opponentId)
-                    .then(() => {
-                      this.statusMessage = 'Game initialized! Redirecting to game...';
+                    // Find opponent (any user that's not the current player)
+                    const opponent = users.find(u => u.userId.toString() !== this.playerId);
 
-                      if (this.roomSubscription) {
-                        this.roomSubscription.unsubscribe();
-                      }
+                    if (opponent && this.playerId) {
+                      const opponentId = opponent.userId.toString();
+                      console.log('Found opponent from room data:', opponentId);
 
-                      setTimeout(() => {
-                        this.router.navigate(['/game', this.roomId])
-                          .catch(err => console.error('Navigation error:', err));
-                      }, 1500);
-                    })
-                    .catch(error => {
-                      console.error('Failed to initialize game:', error);
-                      this.statusMessage = 'Error initializing game. Please refresh.';
-                    });
-                 }
-                } else {
-                  console.log('Players data not available in message, navigating directly to game');
-                  // Fallback if we can't get opponent ID
-                  setTimeout(() => {
-                    this.router.navigate(['/game', this.roomId])
-                      .catch(err => console.error('Navigation error:', err));
-                  }, 1500);
-                }
+                      this.webSocketService.trackGameStart(this.roomId, this.playerId, opponentId)
+                        .then(() => {
+                          console.log('Game tracking successful, navigating to game screen');
+                          this.statusMessage = 'Game initialized! Redirecting to game...';
+                          setTimeout(() => {
+                            this.router.navigate(['/game', this.roomId]);
+                          }, 1500);
+                        })
+                        .catch(error => {
+                          console.error('Failed to track game start:', error);
+                          this.navigateToGameFallback();
+                        });
+                    } else {
+                      console.error('Could not find opponent in room users');
+                      this.navigateToGameFallback();
+                    }
+                  },
+                  error: (err) => {
+                    console.error('Failed to get room users:', err);
+                    this.navigateToGameFallback();
+                  }
+                });
                 break;
             }
           },
           error: (error) => {
+            console.error('Room subscription error:', error);
             this.statusMessage = 'Connection error. Please refresh the page.';
           }
         });
     } catch (error) {
+      console.error('WebSocket initialization error:', error);
       this.statusMessage = 'Connection error. Please refresh the page.';
       this.uploadStatus = 'error';
     }
   }
+
+// Helper method for fallback navigation
+  private navigateToGameFallback() {
+    console.log('Players data not available in message, navigating directly to game');
+    this.statusMessage = 'Proceeding to game...';
+    setTimeout(() => {
+      this.router.navigate(['/game', this.roomId]);
+    }, 1500);
+  }
+
+
+
   async leaveGame() {
     if (confirm('Are you sure you want to leave the game? Your progress will be lost.')) {
       if (this.playerId) {
