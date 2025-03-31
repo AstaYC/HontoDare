@@ -27,7 +27,7 @@
             PLAY NOW
             <i class="fas fa-chevron-right ml-2"></i>
           </a>
-          <a routerLink="/how-to-play" class="font-kill-the-noise border border-red-600 text-red-500 hover:bg-red-900/30 rounded-none px-8 py-6 text-lg font-bold tracking-wider inline-block">
+          <a (click)="scrollToHowToPlay()" class="font-kill-the-noise border border-red-600 text-red-500 hover:bg-red-900/30 rounded-none px-8 py-6 text-lg font-bold tracking-wider inline-block cursor-pointer">
             HOW TO PLAY
           </a>
         </div>
@@ -48,7 +48,7 @@
   </section>
 
   <!-- How to Play Section -->
-  <section class="py-20 bg-gradient-to-b from-black to-gray-900 relative">
+  <section id="how-to-play" class="py-20 bg-gradient-to-b from-black to-gray-900 relative">
     <div class="absolute inset-0 bg-cover bg-center opacity-5" style="background-image: url('/assets/img/texture-bg.jpg')"></div>
     <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
 
@@ -201,3 +201,4 @@
   </div>
 </div>
 <app-footer></app-footer>
+

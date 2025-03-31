@@ -54,4 +54,11 @@ export class RoomListComponent implements OnInit {
       this.router.navigate(['/login']);
     }
   }
+
+  // Add this method to src/app/features/rooms/room-list/room-list.component.ts
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return path;
+  }
 }

@@ -26,4 +26,11 @@ export class NavbarComponent {
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen
   }
+
+  scrollToHowToPlay() {
+    const howToPlaySection = document.getElementById("how-to-play")
+    if (howToPlaySection) {
+      howToPlaySection.scrollIntoView({ behavior: "smooth" })
+    }
+  }
 }

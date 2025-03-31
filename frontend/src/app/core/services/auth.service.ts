@@ -33,6 +33,7 @@ export class AuthService {
           if (userRole) {
             localStorage.setItem('role', userRole);
           }
+
           this.isAuthenticatedSubject.next(true);
         }
       }),

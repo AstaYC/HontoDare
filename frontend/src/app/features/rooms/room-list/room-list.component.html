@@ -18,23 +18,30 @@
       <div *ngFor="let room of rooms; let i = index"
            class="bg-gray-900 border border-gray-800 hover:border-red-600 transition-all duration-300 group overflow-hidden">
         <!-- Room header with image -->
+        <!-- Room header with image -->
         <div class="h-40 bg-gradient-to-br from-red-900 to-black relative overflow-hidden">
           <!-- Background texture -->
           <div class="absolute inset-0 opacity-30 bg-cover bg-center"
                [style.background-image]="'url(/assets/img/texture-bg.jpg)'"></div>
 
-          <!-- Room icon/logo - dynamically choose based on category -->
-          <div class="absolute inset-0 flex items-center justify-center">
+          <!-- Room image if available -->
+          <div *ngIf="room.roomPicUrl" class="absolute inset-0">
+            <img [src]="getImageUrl(room.roomPicUrl)" alt="{{ room.name }}"
+                 class="w-full h-full object-cover opacity-80">
+          </div>
+
+          <!-- Room icon/logo - only show if no image -->
+          <div *ngIf="!room.roomPicUrl" class="absolute inset-0 flex items-center justify-center">
             <i class="fas"
                [ngClass]="{
-                 'fa-dragon': room.category === 'Anime',
-                 'fa-mask': room.category === 'Comics',
-                 'fa-film': room.category === 'Movies',
-                 'fa-gamepad': room.category === 'Games',
-                 'fa-book': room.category === 'Books',
-                 'fa-tv': room.category === 'TV Shows',
-                 'fa-globe': !['Anime', 'Comics', 'Movies', 'Games', 'Books', 'TV Shows'].includes(room.category)
-               }"
+         'fa-dragon': room.category === 'Anime',
+         'fa-mask': room.category === 'Comics',
+         'fa-film': room.category === 'Movies',
+         'fa-gamepad': room.category === 'Games',
+         'fa-book': room.category === 'Books',
+         'fa-tv': room.category === 'TV Shows',
+         'fa-globe': !['Anime', 'Comics', 'Movies', 'Games', 'Books', 'TV Shows'].includes(room.category)
+       }"
                class="text-red-500 text-5xl group-hover:scale-110 transition-transform duration-300"></i>
           </div>
 
@@ -42,7 +49,6 @@
           <div class="absolute top-0 right-0 w-20 h-20 bg-red-600 transform rotate-45 translate-x-8 -translate-y-8 opacity-50"></div>
           <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-transparent"></div>
         </div>
-
         <!-- Room content -->
         <div class="p-6">
           <h3 class="font-kill-the-noise text-xl text-red-500 mb-2 transform -skew-x-6">

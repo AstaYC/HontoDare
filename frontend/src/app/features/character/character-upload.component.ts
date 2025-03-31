@@ -6,6 +6,8 @@ import { CharacterService } from '../../core/services/character.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { RoomService } from '../../core/services/room.service';
+
 
 @Component({
   selector: 'app-character-upload',
@@ -41,7 +43,9 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     private router: Router,
     private characterService: CharacterService,
     private authService: AuthService,
-    private webSocketService: WebSocketService
+    private webSocketService: WebSocketService,
+    private roomService: RoomService
+
   ) {}
 
   onFileSelected(event: Event) {
@@ -176,10 +180,14 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     this.roomId = parseInt(this.route.snapshot.paramMap.get('id') || '0', 10);
     this.playerId = this.authService.getCurrentUserId()?.toString() || null;
 
+
+
     if (!this.playerId) {
       this.router.navigate(['/login']);
       return;
     }
+
+    this.leaveRoom();
 
     // Add these properties
     this.waitingForOpponent = true;
@@ -304,6 +312,22 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     // Clean up subscriptions
     if (this.roomSubscription) {
       this.roomSubscription.unsubscribe();
+    }
+  }
+
+  leaveRoom() {
+    const playerId = this.authService.getCurrentUserId();
+    if (playerId) {
+      // Send WebSocket message first
+      this.webSocketService.sendLeaveRoomMessage(this.roomId, playerId.toString());
+
+      // Then call the REST API
+      this.roomService.leaveRoom(this.roomId, playerId).subscribe({
+        next: () => {
+          this.webSocketService.disconnect();
+        },
+        error: (err) => console.error('Failed to leave room:', err)
+      });
     }
   }
 }

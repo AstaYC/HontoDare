@@ -1,10 +1,9 @@
-// src/app/core/services/room.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { HttpHeaders } from '@angular/common/http';
-import {Room} from "../models/room.model";
+import { Room } from "../models/room.model";
 
 @Injectable({
   providedIn: 'root'
@@ -36,14 +35,12 @@ export class RoomService {
     return this.http.get<any[]>(`${this.apiUrl}/api/waiting/${roomId}/users`);
   }
 
-
-
   createRoom(room: Room): Observable<Room> {
     return this.http.post<Room>(`${this.apiUrl}/api/rooms`, room);
   }
 
   updateRoom(room: Room): Observable<Room> {
-    return this.http.put<Room>(`${this.apiUrl}/api/rooms`, room);
+    return this.http.put<Room>(`${this.apiUrl}/api/rooms/${room.id}`, room);
   }
 
   deleteRoom(id: number): Observable<void> {
@@ -55,6 +52,9 @@ export class RoomService {
   }
 
   updateRoomWithImage(id: number, formData: FormData): Observable<Room> {
+    // Fixed this URL to match the controller's expected endpoint
     return this.http.put<Room>(`${this.apiUrl}/api/rooms/${id}`, formData);
   }
+
+
 }

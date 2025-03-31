@@ -1,9 +1,9 @@
 import { Component } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterModule } from "@angular/router"
-import {LayoutComponent} from "../../shared/layout/layout.component";
-import {NavbarComponent} from "../../shared/navbar/navbar.component";
-import {FooterComponent} from "../../shared/footer/footer.component";
+import { LayoutComponent } from "../../shared/layout/layout.component"
+import { NavbarComponent } from "../../shared/navbar/navbar.component"
+import { FooterComponent } from "../../shared/footer/footer.component"
 
 interface Step {
   icon: string
@@ -21,7 +21,7 @@ interface Feature {
   selector: "app-home",
   standalone: true,
   imports: [CommonModule, RouterModule, LayoutComponent, NavbarComponent, FooterComponent],
-  templateUrl: './home.component.html',
+  templateUrl: "./home.component.html",
   styleUrls: ["./home.component.css"],
 })
 export class HomeComponent {
@@ -66,22 +66,37 @@ export class HomeComponent {
     },
   ]
 
-  // Add this to your component class
+  scrollToHowToPlay() {
+    const howToPlaySection = document.getElementById("how-to-play")
+    if (howToPlaySection) {
+      howToPlaySection.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
   openGameModal(event: Event): void {
-    event.preventDefault();
-    const modal = document.getElementById('gameModal');
-    const modalContent = modal?.querySelector('.modal-content') as HTMLElement;
-    const button = event.currentTarget as HTMLElement;
+    event.preventDefault()
+    const modal = document.getElementById("gameModal")
+    const modalContent = modal?.querySelector(".modal-content") as HTMLElement
+    const button = event.currentTarget as HTMLElement
 
     if (modal && modalContent) {
       // Get button position
-      const buttonRect = button.getBoundingClientRect();
+      const buttonRect = button.getBoundingClientRect()
 
       // Set initial position for animation
-      modalContent.style.transformOrigin = `center ${window.innerHeight - buttonRect.top}px`;
+      modalContent.style.transformOrigin = `center ${window.innerHeight - buttonRect.top}px`
 
       // Show modal
-      modal.classList.remove('hidden');
+      modal.classList.remove("hidden")
     }
   }
+
+  closeGameModal(): void {
+    const modal = document.getElementById("gameModal")
+    if (modal) {
+      modal.classList.add("hidden")
+    }
+  }
+
 }
+

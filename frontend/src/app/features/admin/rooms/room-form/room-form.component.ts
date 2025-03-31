@@ -1,4 +1,3 @@
-// src/app/features/admin/rooms/room-form/room-form.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -114,7 +113,7 @@ export class RoomFormComponent implements OnInit {
     if (!path) return '';
     if (path.startsWith('http')) return path;
     if (path.startsWith('/assets')) return path; // Assets are served directly
-    return environment.apiUrl + path;
+    return path; // Changed to use the path directly since assets are served from frontend/src/assets
   }
 
   onSubmit(): void {
@@ -122,6 +121,12 @@ export class RoomFormComponent implements OnInit {
 
     this.loading = true;
     const roomData = this.roomForm.value as Room;
+
+    // Make sure to include the ID for updates
+    if (this.isEditing && this.roomId) {
+      roomData.id = this.roomId;
+    }
+
     const formData = new FormData();
 
     // Convert roomData to JSON and append to FormData
@@ -135,21 +140,25 @@ export class RoomFormComponent implements OnInit {
     if (this.isEditing && this.roomId) {
       this.roomService.updateRoomWithImage(this.roomId, formData).subscribe({
         next: () => {
+          this.loading = false;
           this.router.navigate(['/admin/rooms']);
         },
         error: (error) => {
           console.error('Error updating room:', error);
           this.loading = false;
+          alert('Failed to update the room. Please try again.'); // Add an alert to show error to user
         }
       });
     } else {
       this.roomService.createRoomWithImage(formData).subscribe({
         next: () => {
+          this.loading = false;
           this.router.navigate(['/admin/rooms']);
         },
         error: (error) => {
           console.error('Error creating room:', error);
           this.loading = false;
+          alert('Failed to create the room. Please try again.'); // Add an alert to show error to user
         }
       });
     }

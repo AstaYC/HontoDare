@@ -1,4 +1,3 @@
-// src/app/features/admin/rooms/room-list/room-list.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -7,7 +6,7 @@ import { Room } from '../../../../core/models/room.model';
 import { AdminHeaderComponent } from '../../admin-header/admin-header.component';
 import { AdminSidebarComponent } from '../../admin-sidebar/admin-sidebar.component';
 import { HttpClientModule } from '@angular/common/http';
-import {environment} from "../../../../../environments/environment";
+import { environment } from "../../../../../environments/environment";
 
 @Component({
   selector: 'app-room-list',
@@ -75,6 +74,7 @@ export class RoomAdminListComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error deleting room:', error);
+          alert('Failed to delete the room. Please try again.');
         }
       });
     }
@@ -84,6 +84,8 @@ export class RoomAdminListComponent implements OnInit {
     if (!path) return '';
     if (path.startsWith('http')) return path;
     if (path.startsWith('/assets')) return path; // Assets are served directly
-    return environment.apiUrl + path;
+    return path;
   }
+
+
 }
