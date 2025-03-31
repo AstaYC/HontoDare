@@ -45,10 +45,10 @@ public class Game {
     private User winner;
 
     @ManyToOne
-    @JoinColumn(name = "character1_id", nullable = false)  // Adjust based on actual DB column name
+    @JoinColumn(name = "character1_id", nullable = true)  // Adjust based on actual DB column name
     private Character character1;
 
     @ManyToOne
-    @JoinColumn(name = "character2_id", nullable = false)  // Adjust based on actual DB column name
+    @JoinColumn(name = "character2_id", nullable = true)  // Adjust based on actual DB column name
     private Character character2;
 }

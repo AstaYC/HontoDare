@@ -1,0 +1,93 @@
+<!-- src/app/features/admin/characters/character-list/character-list.component.html -->
+<div class="flex h-screen bg-gray-900">
+  <!-- Sidebar -->
+  <app-admin-sidebar></app-admin-sidebar>
+
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <app-admin-header></app-admin-header>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-2xl font-kill-the-noise text-red-600">Characters Management</h1>
+        <a routerLink="/admin/characters/create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+          <i class="fas fa-plus mr-2"></i> Add Character
+        </a>
+      </div>
+
+      <!-- Category Filters -->
+      <div class="mb-4 flex items-center space-x-2 overflow-x-auto py-2">
+        <span class="text-gray-400">Filter by category:</span>
+        <button
+          (click)="resetFilter()"
+          class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm"
+        >
+          All
+        </button>
+        <button
+          *ngFor="let category of categories"
+          (click)="filterByCategory(category)"
+          class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm"
+        >
+          {{category}}
+        </button>
+      </div>
+
+      <div class="bg-gray-800 rounded-lg shadow-lg">
+        <div class="table-container">
+          <table class="w-full text-left">
+            <thead>
+            <tr class="border-b border-gray-700">
+              <th class="py-3 px-4 text-gray-400 font-medium">Image</th>
+              <th class="py-3 px-4 text-gray-400 font-medium">Name</th>
+              <th class="py-3 px-4 text-gray-400 font-medium">Category</th>
+              <th class="py-3 px-4 text-gray-400 font-medium">Glance</th>
+              <th class="py-3 px-4 text-gray-400 font-medium">User</th>
+              <th class="py-3 px-4 text-gray-400 font-medium">Room</th>
+              <th class="py-3 px-4 text-gray-400 font-medium">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngIf="loading">
+              <td colspan="7" class="py-8 text-center text-gray-400">Loading characters...</td>
+            </tr>
+            <tr *ngFor="let character of characters" class="border-b border-gray-700 hover:bg-gray-700">
+                <td class="py-3 px-4">
+                    <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-700">
+                        <img [src]="getImageUrl(character.picUrl)" alt="Character" class="w-full h-full object-cover">
+                        <div *ngIf="!character.picUrl" class="w-full h-full flex items-center justify-center text-gray-500">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                </td>
+              <td class="py-3 px-4 text-white font-medium">{{ character.name }}</td>
+              <td class="py-3 px-4">
+                  <span class="px-2 py-1 rounded text-xs bg-blue-900 text-blue-200">
+                    {{ character.category }}
+                  </span>
+              </td>
+              <td class="py-3 px-4 text-white">{{ character.glance }}</td>
+              <td class="py-3 px-4 text-white">{{ character.user?.name || 'N/A' }}</td>
+              <td class="py-3 px-4 text-white">{{ character.room?.name || 'N/A' }}</td>
+              <td class="py-3 px-4">
+                <div class="flex space-x-2">
+                  <a [routerLink]="['/admin/characters/edit', character.id]" class="text-blue-400 hover:text-blue-300">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <button (click)="deleteCharacter(character.id)" class="text-red-400 hover:text-red-300">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="characters.length === 0 && !loading">
+              <td colspan="7" class="py-8 text-center text-gray-400">No characters found</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

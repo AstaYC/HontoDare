@@ -1,0 +1,81 @@
+<!-- src/app/features/admin/users/user-list/user-list.component.html -->
+<div class="flex h-screen bg-gray-900">
+    <!-- Sidebar -->
+    <app-admin-sidebar></app-admin-sidebar>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Header -->
+        <app-admin-header></app-admin-header>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="mb-6 flex justify-between items-center">
+                <h1 class="text-2xl font-kill-the-noise text-red-600">Users Management</h1>
+                <a routerLink="/admin/users/create" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                    <i class="fas fa-plus mr-2"></i> Add User
+                </a>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg shadow-lg">
+                <div class="table-container">
+                    <table class="w-full text-left">
+                        <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="py-3 px-4 text-gray-400 font-medium">User</th>
+                            <th class="py-3 px-4 text-gray-400 font-medium">Email</th>
+                            <th class="py-3 px-4 text-gray-400 font-medium">Role</th>
+                            <th class="py-3 px-4 text-gray-400 font-medium">Points</th>
+                            <th class="py-3 px-4 text-gray-400 font-medium">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngIf="loading">
+                            <td colspan="5" class="py-8 text-center text-gray-400">Loading users...</td>
+                        </tr>
+                        <tr *ngFor="let user of users" class="border-b border-gray-700 hover:bg-gray-700">
+                            <td class="py-3 px-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="avatar-container h-10 w-10 bg-gray-700">
+                                        <img *ngIf="user.avatarUrl" [src]="user.avatarUrl" alt="User avatar" class="h-full w-full object-cover">
+                                        <div *ngIf="!user.avatarUrl" class="h-full w-full flex items-center justify-center text-gray-400">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-white">{{ user.name }}</div>
+                                        <div class="text-sm text-gray-400">{{ user.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 text-white">{{ user.email }}</td>
+                            <td class="py-3 px-4">
+                  <span [ngClass]="{
+                    'bg-red-900 text-red-200': user.role === 'ADMIN',
+                    'bg-blue-900 text-blue-200': user.role === 'MODERATOR',
+                    'bg-green-900 text-green-200': user.role === 'USER'
+                  }" class="px-2 py-1 rounded text-xs">
+                    {{ user.role }}
+                  </span>
+                            </td>
+                            <td class="py-3 px-4 text-white">{{ user.points }}</td>
+                            <td class="py-3 px-4">
+                                <div class="flex space-x-2">
+                                    <a [routerLink]="['/admin/users/edit', user.id]" class="text-blue-400 hover:text-blue-300">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button (click)="deleteUser(user.id)" class="text-red-400 hover:text-red-300">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="users.length === 0 && !loading">
+                            <td colspan="5" class="py-8 text-center text-gray-400">No users found</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,8 +6,6 @@ import { CharacterService } from '../../core/services/character.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { RoomService } from '../../core/services/room.service';
-
 
 @Component({
   selector: 'app-character-upload',
@@ -29,16 +27,22 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
   statusMessage: string = '';
   roomSubscription?: Subscription;
   dragActive: boolean = false;
+  redirecting: boolean = false;
+  waitingForOpponent: boolean = true;
+  systemMessages: any[] = [];
+  playerName: string = '';
+  opponentName: string = '';
+  opponentId: string | null = null;
+  opponentJoined: boolean = false;
+  freeChatSubscription?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private characterService: CharacterService,
     private authService: AuthService,
-    private webSocketService: WebSocketService,
-    private roomService: RoomService
-
-) {}
+    private webSocketService: WebSocketService
+  ) {}
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -80,8 +84,7 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
   }
 
-  // In character-upload.component.ts, modify the uploadCharacter method
-
+// In character-upload.component.ts - modify the uploadCharacter method
   uploadCharacter() {
     if (!this.selectedFile || !this.characterName) {
       this.uploadStatus = 'error';
@@ -119,7 +122,7 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
           this.isUploading = false;
           this.uploadProgress = 100;
           this.uploadStatus = 'success';
-          this.statusMessage = 'Character uploaded successfully! Waiting for opponent...';
+          this.statusMessage = 'Character uploaded successfully! Redirecting to game...';
 
           console.log('Character upload response:', response);
 
@@ -147,8 +150,13 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
                 );
                 await this.webSocketService.trackCharacterUpload(this.roomId, this.playerId);
               } catch (error) {
-                this.statusMessage = 'Upload complete but failed to notify opponent. Please refresh.';
+                console.error('Failed to notify character upload:', error);
               }
+
+              // Navigate to game immediately after upload
+              setTimeout(() => {
+                this.router.navigate(['/game', this.roomId]);
+              }, 1500);
             }
           } else {
             console.error('Could not find character ID in response:', response);
@@ -163,6 +171,7 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
       });
   }
 
+
   ngOnInit() {
     this.roomId = parseInt(this.route.snapshot.paramMap.get('id') || '0', 10);
     this.playerId = this.authService.getCurrentUserId()?.toString() || null;
@@ -172,23 +181,32 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Add these properties
+    this.waitingForOpponent = true;
+    this.systemMessages = [];
+
     this.initializeWebSocket();
   }
 
   private async initializeWebSocket() {
-    console.log('Current localStorage state:', {
-      characterIdForPlayer: localStorage.getItem(`character_${this.roomId}_${this.playerId}`),
-      playerId: this.playerId,
-      roomId: this.roomId
-    });
     try {
-      // Ensure we're connected to WebSocket
       await this.webSocketService.connect(this.playerId!, this.roomId);
+
+      // Send a player join notification when connecting
+      this.webSocketService.sendChatMessage(
+        `PLAYER_JOINED:${this.playerName}`,
+        'SYSTEM_MESSAGE',
+        this.playerId!,
+        this.roomId
+      );
+
+      // Add self-join message
+      this.addSystemMessage(`You joined the chat.`);
 
       this.roomSubscription = this.webSocketService.subscribeToRoom(this.roomId)
         .subscribe({
           next: (message: any) => {
-            console.log('Received message:', message);
+            console.log('Room message received:', message);
 
             switch (message.type) {
               case 'CHARACTER_UPLOADED':
@@ -199,69 +217,53 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
                 }
                 break;
 
-              // In character-upload.component.ts, update the ALL_PLAYERS_UPLOADED case
-              case 'ALL_PLAYERS_UPLOADED':
-                this.statusMessage = 'Both players ready! Initializing game...';
-
-                // Use RoomService to get room users instead of WebSocket message content
-                this.roomService.getRoomUsers(this.roomId).subscribe({
-                  next: (users) => {
-                    console.log('Room users from API:', users);
-
-                    // Find opponent (any user that's not the current player)
-                    const opponent = users.find(u => u.userId.toString() !== this.playerId);
-
-                    if (opponent && this.playerId) {
-                      const opponentId = opponent.userId.toString();
-                      console.log('Found opponent from room data:', opponentId);
-
-                      this.webSocketService.trackGameStart(this.roomId, this.playerId, opponentId)
-                        .then(() => {
-                          console.log('Game tracking successful, navigating to game screen');
-                          this.statusMessage = 'Game initialized! Redirecting to game...';
-                          setTimeout(() => {
-                            this.router.navigate(['/game', this.roomId]);
-                          }, 1500);
-                        })
-                        .catch(error => {
-                          console.error('Failed to track game start:', error);
-                          this.navigateToGameFallback();
-                        });
-                    } else {
-                      console.error('Could not find opponent in room users');
-                      this.navigateToGameFallback();
-                    }
-                  },
-                  error: (err) => {
-                    console.error('Failed to get room users:', err);
-                    this.navigateToGameFallback();
-                  }
-                });
-                break;
             }
           },
           error: (error) => {
             console.error('Room subscription error:', error);
             this.statusMessage = 'Connection error. Please refresh the page.';
+            this.uploadStatus = 'error';
           }
         });
+
+      // Add a subscription to free chat for system messages
+      this.freeChatSubscription = this.webSocketService
+        .subscribe(`/topic/room/${this.roomId}/free`)
+        .subscribe({
+          next: (message: any) => {
+            console.log('Free chat message received:', message);
+
+            // Handle system messages for player joining
+            if (message.type === 'SYSTEM_MESSAGE' && message.content.startsWith('PLAYER_JOINED:')) {
+              const joiningPlayerName = message.content.substring('PLAYER_JOINED:'.length);
+
+              // If it's not the current player
+              if (message.sender !== this.playerId) {
+                this.opponentId = message.sender;
+                this.opponentName = joiningPlayerName;
+                this.opponentJoined = true;
+                this.waitingForOpponent = false;
+                this.addSystemMessage(`${joiningPlayerName} joined the chat.`);
+              }
+            }
+          },
+          error: (error) => console.error('Free chat subscription error:', error)
+        });
     } catch (error) {
-      console.error('WebSocket initialization error:', error);
+      console.error('WebSocket connection error:', error);
       this.statusMessage = 'Connection error. Please refresh the page.';
       this.uploadStatus = 'error';
     }
   }
 
-// Helper method for fallback navigation
-  private navigateToGameFallback() {
-    console.log('Players data not available in message, navigating directly to game');
-    this.statusMessage = 'Proceeding to game...';
-    setTimeout(() => {
-      this.router.navigate(['/game', this.roomId]);
-    }, 1500);
+// Add this helper method
+  addSystemMessage(message: string) {
+    this.systemMessages.push({
+      content: message,
+      timestamp: new Date()
+    });
+    console.log('System message added:', message);
   }
-
-
 
   async leaveGame() {
     if (confirm('Are you sure you want to leave the game? Your progress will be lost.')) {
@@ -305,3 +307,4 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     }
   }
 }
+

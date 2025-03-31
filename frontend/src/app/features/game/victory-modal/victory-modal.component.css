@@ -1,0 +1,285 @@
+.victory-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.victory-container {
+  position: relative;
+  width: 90%;
+  max-width: 800px;
+  background: linear-gradient(135deg, #0a0a20, #111133, #0a0a20);
+  border: 4px solid #ffd700;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  overflow: hidden;
+}
+
+/* Purple background with Gojo effect */
+.purple-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("../../../../assets/img/gojo-purple.gif") center center;
+  background-size: cover;
+  opacity: 0.4;
+  z-index: 1;
+}
+
+/* Top Gojo image */
+.top-gojo {
+  position: relative;
+  height: 180px;
+  margin-bottom: 20px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.gojo-top-image {
+  height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(147, 51, 234, 0.8));
+}
+
+/* Victory text styling */
+.victory-text {
+  position: relative;
+  z-index: 3;
+  margin-top: 20px;
+}
+
+.japanese-text {
+  font-family: "Samurai", "Arial", sans-serif;
+  font-size: 3.5rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.english-text {
+  font-family: "Kill", "Arial", sans-serif;
+  font-size: 2.8rem;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  background: linear-gradient(to right, #9333ea, #c026d3, #9333ea);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 10px rgba(147, 51, 234, 0.7);
+  animation: colorShift 3s ease-in-out infinite alternate;
+}
+
+@keyframes colorShift {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(30deg);
+  }
+}
+
+.purple-line {
+  height: 3px;
+  width: 60%;
+  margin: 15px auto;
+  background: linear-gradient(to right, transparent, #9333ea, #c026d3, #9333ea, transparent);
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700;
+  }
+  to {
+    text-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700, 0 0 40px #ffd700;
+  }
+}
+
+/* Confetti styling */
+.confetti-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  opacity: 0.8;
+  animation: fall linear infinite;
+}
+
+/* Mix of gold and purple confetti */
+.confetti-1 {
+  left: 10%;
+  animation-duration: 3s;
+  animation-delay: 0s;
+  background-color: #ffd700;
+}
+.confetti-2 {
+  left: 20%;
+  animation-duration: 4s;
+  animation-delay: 0.5s;
+  background-color: #9333ea;
+}
+.confetti-3 {
+  left: 30%;
+  animation-duration: 2.5s;
+  animation-delay: 1s;
+  background-color: #ffd700;
+}
+.confetti-4 {
+  left: 40%;
+  animation-duration: 3.5s;
+  animation-delay: 1.5s;
+  background-color: #c026d3;
+}
+.confetti-5 {
+  left: 50%;
+  animation-duration: 4.5s;
+  animation-delay: 2s;
+  background-color: #ffd700;
+}
+.confetti-6 {
+  left: 60%;
+  animation-duration: 3s;
+  animation-delay: 2.5s;
+  background-color: #9333ea;
+}
+.confetti-7 {
+  left: 70%;
+  animation-duration: 3.5s;
+  animation-delay: 3s;
+  background-color: #ffd700;
+}
+.confetti-8 {
+  left: 80%;
+  animation-duration: 4s;
+  animation-delay: 3.5s;
+  background-color: #c026d3;
+}
+.confetti-9 {
+  left: 90%;
+  animation-duration: 2.5s;
+  animation-delay: 4s;
+  background-color: #ffd700;
+}
+.confetti-10 {
+  left: 15%;
+  animation-duration: 3.5s;
+  animation-delay: 0.2s;
+  background-color: #9333ea;
+}
+.confetti-11 {
+  left: 25%;
+  animation-duration: 4.5s;
+  animation-delay: 0.7s;
+  background-color: #ffd700;
+}
+.confetti-12 {
+  left: 35%;
+  animation-duration: 3s;
+  animation-delay: 1.2s;
+  background-color: #c026d3;
+}
+
+@keyframes fall {
+  0% {
+    top: -10px;
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    top: 100%;
+    transform: rotate(360deg) scale(0.5);
+  }
+}
+
+/* Trophy icon */
+.trophy-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 5;
+}
+
+.trophy-icon {
+  font-size: 60px;
+  color: #ffd700;
+  animation: bounce 2s ease infinite;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .victory-container {
+    padding: 20px;
+  }
+
+  .top-gojo {
+    height: 140px;
+  }
+
+  .gojo-top-image {
+    height: 120px;
+  }
+
+  .japanese-text {
+    font-size: 2.5rem;
+  }
+
+  .english-text {
+    font-size: 2rem;
+  }
+
+  .trophy-icon {
+    font-size: 40px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .top-gojo {
+    height: 120px;
+  }
+
+  .gojo-top-image {
+    height: 100px;
+  }
+
+  .japanese-text {
+    font-size: 2rem;
+  }
+
+  .english-text {
+    font-size: 1.5rem;
+  }
+}
+

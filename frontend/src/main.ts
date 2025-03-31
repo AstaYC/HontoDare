@@ -6,9 +6,11 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app/app.routes';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 bootstrapApplication(AppComponent, {
   providers: [
-    importProvidersFrom(BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule, AppRoutingModule)
+    importProvidersFrom(BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule, AppRoutingModule),
+    provideAnimations(),
   ]
 });

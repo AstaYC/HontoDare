@@ -1,0 +1,13 @@
+/* src/app/features/admin/users/user-list/user-list.component.css */
+.avatar-container {
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.table-container {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}

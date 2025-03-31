@@ -1,0 +1,42 @@
+<div class="victory-overlay" @fadeIn>
+  <div class="victory-container" @slideDown>
+    <!-- Purple background effect -->
+    <div class="purple-background"></div>
+
+    <!-- Top Gojo image -->
+    <div class="top-gojo">
+      <img src="assets/img/gojo.gif" alt="Gojo Satoru" class="gojo-top-image" @gojoAnimation>
+    </div>
+
+    <!-- Victory text -->
+    <div class="victory-text">
+      <h1 class="font-kill-the-noise text-yellow-400 japanese-text">おめでとう!</h1>
+      <h1  style="font-size: 500%;" class="font-samurai text-purple-500">OMEDETOU!</h1>
+      <div class="purple-line"></div>
+      <p class="text-xl text-white mt-4 font-kill-the-noise">{{ playerName }}, you are the champion!</p>
+      <p class="text-lg text-gray-300 mt-6 font-samurai">RETURNING TO HOME IN {{ countdown }} SECONDS...</p>
+    </div>
+
+    <!-- Confetti elements -->
+    <div class="confetti-container" @confetti>
+      <div class="confetti confetti-1"></div>
+      <div class="confetti confetti-2"></div>
+      <div class="confetti confetti-3"></div>
+      <div class="confetti confetti-4"></div>
+      <div class="confetti confetti-5"></div>
+      <div class="confetti confetti-6"></div>
+      <div class="confetti confetti-7"></div>
+      <div class="confetti confetti-8"></div>
+      <div class="confetti confetti-9"></div>
+      <div class="confetti confetti-10"></div>
+      <div class="confetti confetti-11"></div>
+      <div class="confetti confetti-12"></div>
+    </div>
+
+    <!-- Trophy icon -->
+    <div class="trophy-container">
+      <i class="fas fa-trophy trophy-icon"></i>
+    </div>
+  </div>
+</div>
+

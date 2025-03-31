@@ -1,0 +1,101 @@
+<!-- src/app/features/admin/rooms/room-form/room-form.component.html -->
+<div class="flex h-screen bg-gray-900">
+  <!-- Sidebar -->
+  <app-admin-sidebar></app-admin-sidebar>
+
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <app-admin-header></app-admin-header>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-2xl font-kill-the-noise text-red-600">{{ isEditing ? 'Edit Room' : 'Create Room' }}</h1>
+        <a routerLink="/admin/rooms" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">
+          <i class="fas fa-arrow-left mr-2"></i> Back to Rooms
+        </a>
+      </div>
+
+      <div class="bg-gray-800 rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+        <form [formGroup]="roomForm" (ngSubmit)="onSubmit()">
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <label for="name" class="block text-gray-400 mb-1">Room Name</label>
+              <input
+                type="text"
+                id="name"
+                formControlName="name"
+                class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+              />
+              <div *ngIf="roomForm.get('name')?.invalid && roomForm.get('name')?.touched" class="text-red-400 text-sm mt-1">
+                Room name is required
+              </div>
+            </div>
+
+            <div>
+              <label for="description" class="block text-gray-400 mb-1">Description</label>
+              <textarea
+                id="description"
+                formControlName="description"
+                rows="4"
+                class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+              ></textarea>
+              <div *ngIf="roomForm.get('description')?.invalid && roomForm.get('description')?.touched" class="text-red-400 text-sm mt-1">
+                Description is required
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="maxPlayers" class="block text-gray-400 mb-1">Maximum Players</label>
+                <input
+                  type="text"
+                  id="maxPlayers"
+                  formControlName="maxPlayers"
+                  class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                />
+                <div *ngIf="roomForm.get('maxPlayers')?.invalid && roomForm.get('maxPlayers')?.touched" class="text-red-400 text-sm mt-1">
+                  Valid number of players is required
+                </div>
+              </div>
+
+              <div>
+                <label for="category" class="block text-gray-400 mb-1">Category</label>
+                <select
+                  id="category"
+                  formControlName="category"
+                  class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                >
+                  <option value="" disabled>Select a category</option>
+                  <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+                </select>
+                <div *ngIf="roomForm.get('category')?.invalid && roomForm.get('category')?.touched" class="text-red-400 text-sm mt-1">
+                  Category is required
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <a
+              routerLink="/admin/rooms"
+              class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded mr-2">
+              Cancel
+            </a>
+            <button
+              type="submit"
+              [disabled]="roomForm.invalid || loading"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+              [ngClass]="{'opacity-50': roomForm.invalid || loading}"
+            >
+              <span *ngIf="loading">
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+              </span>
+              {{ isEditing ? 'Update' : 'Create' }} Room
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

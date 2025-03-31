@@ -4,6 +4,7 @@ import com.astayc.hontodare.DTO.GameDTO;
 import com.astayc.hontodare.Entity.Game;
 import com.astayc.hontodare.Repository.GameRepository;
 import com.astayc.hontodare.Service.GameService;
+import org.hibernate.sql.ast.tree.expression.Over;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,29 @@ public class GameServiceImpl implements GameService {
     @Override
     public GameDTO updateGame(GameDTO gameDTO) {
         Game existingGame = gameRepository.findById(gameDTO.getId()).orElseThrow();
-        modelMapper.map(gameDTO, existingGame);
+
+        // Only update specific fields instead of using modelMapper
+        if (gameDTO.getEndTime() != null) {
+            existingGame.setEndTime(gameDTO.getEndTime());
+        }
+
+        if (gameDTO.getWinnerId() != null) {
+            com.astayc.hontodare.Entity.User winner = new com.astayc.hontodare.Entity.User();
+            winner.setId(gameDTO.getWinnerId());
+            existingGame.setWinner(winner);
+        }
+        // Handle character2Id update properly
+        if (gameDTO.getCharacter2Id() != null) {
+            // Create Character entity with the ID if it doesn't exist
+            if (existingGame.getCharacter2() == null) {
+                com.astayc.hontodare.Entity.Character character2 = new com.astayc.hontodare.Entity.Character();
+                character2.setId(gameDTO.getCharacter2Id());
+                existingGame.setCharacter2(character2);
+            } else {
+                existingGame.getCharacter2().setId(gameDTO.getCharacter2Id());
+            }
+        }
+
         Game updatedGame = gameRepository.save(existingGame);
         return modelMapper.map(updatedGame, GameDTO.class);
     }
@@ -73,6 +96,5 @@ public class GameServiceImpl implements GameService {
         List<Game> games = gameRepository.findByPlayer1IdOrPlayer2Id(playerId, playerId);
         return games.stream().map(game -> modelMapper.map(game, GameDTO.class)).collect(Collectors.toList());
     }
-
 
 }

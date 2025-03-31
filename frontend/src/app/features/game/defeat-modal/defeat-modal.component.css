@@ -1,0 +1,223 @@
+.defeat-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.defeat-container {
+  position: relative;
+  width: 90%;
+  max-width: 800px;
+  background: linear-gradient(135deg, #200000, #330000, #200000);
+  border: 4px solid #8b0000;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+/* Sukuna background effect */
+.sukuna-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("../../../../assets/img/sukuna.gif") center center;
+  background-size: cover;
+  opacity: 0.3;
+  z-index: 1;
+  filter: hue-rotate(340deg) saturate(1.5);
+}
+
+/* Top Sukuna image */
+.top-sukuna {
+  position: relative;
+  height: 180px;
+  margin-bottom: 20px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.sukuna-top-image {
+  height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(139, 0, 0, 0.8));
+}
+
+/* Defeat text styling */
+.defeat-text {
+  position: relative;
+  z-index: 3;
+  margin-top: 20px;
+}
+
+.japanese-text {
+  font-family: "Samurai", "Arial", sans-serif;
+  font-size: 3.5rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
+  animation: redGlow 2s ease-in-out infinite alternate;
+}
+
+.english-text {
+  font-family: "Kill", "Arial", sans-serif;
+  font-size: 2.8rem;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  background: linear-gradient(to right, #8b0000, #ff0000, #8b0000);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 10px rgba(139, 0, 0, 0.7);
+  animation: colorShift 3s ease-in-out infinite alternate;
+}
+
+@keyframes colorShift {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(15deg);
+  }
+}
+
+.red-line {
+  height: 3px;
+  width: 60%;
+  margin: 15px auto;
+  background: linear-gradient(to right, transparent, #8b0000, #ff0000, #8b0000, transparent);
+}
+
+@keyframes redGlow {
+  from {
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
+  }
+  to {
+    text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000, 0 0 40px #ff0000;
+  }
+}
+
+/* Flames container */
+.flames-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.flame {
+  position: absolute;
+  bottom: 0;
+  width: 20px;
+  height: 60px;
+  background: linear-gradient(to top, #ff0000, #ff6600, #ffcc00, transparent);
+  border-radius: 50% 50% 0 0;
+  transform-origin: center bottom;
+  animation: flicker 3s ease-in-out infinite alternate;
+}
+
+.flame-1 {
+  left: 10%;
+  animation-delay: 0s;
+}
+.flame-2 {
+  left: 30%;
+  animation-delay: 0.5s;
+}
+.flame-3 {
+  left: 50%;
+  animation-delay: 1s;
+}
+.flame-4 {
+  left: 70%;
+  animation-delay: 1.5s;
+}
+.flame-5 {
+  left: 90%;
+  animation-delay: 2s;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    height: 60px;
+    opacity: 1;
+  }
+  25% {
+    height: 50px;
+    opacity: 0.8;
+  }
+  50% {
+    height: 70px;
+    opacity: 1;
+  }
+  75% {
+    height: 55px;
+    opacity: 0.9;
+  }
+}
+
+/* Font classes */
+.font-kill {
+  font-family: "Kill", "Arial", sans-serif;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .defeat-container {
+    padding: 20px;
+  }
+
+  .top-sukuna {
+    height: 140px;
+  }
+
+  .sukuna-top-image {
+    height: 120px;
+  }
+
+  .japanese-text {
+    font-size: 2.5rem;
+  }
+
+  .english-text {
+    font-size: 2rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .top-sukuna {
+    height: 120px;
+  }
+
+  .sukuna-top-image {
+    height: 100px;
+  }
+
+  .japanese-text {
+    font-size: 2rem;
+  }
+
+  .english-text {
+    font-size: 1.5rem;
+  }
+}
+

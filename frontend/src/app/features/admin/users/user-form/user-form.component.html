@@ -1,0 +1,130 @@
+<!-- src/app/features/admin/users/user-form/user-form.component.html -->
+<div class="flex h-screen bg-gray-900">
+    <!-- Sidebar -->
+    <app-admin-sidebar></app-admin-sidebar>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Header -->
+        <app-admin-header></app-admin-header>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <div class="mb-6 flex justify-between items-center">
+                <h1 class="text-2xl font-kill-the-noise text-red-600">{{ isEditing ? 'Edit User' : 'Create User' }}</h1>
+                <a routerLink="/admin/users" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Users
+                </a>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+                <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="username" class="block text-gray-400 mb-1">Username</label>
+                            <input
+                                    type="text"
+                                    id="username"
+                                    formControlName="username"
+                                    class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                            />
+                            <div *ngIf="userForm.get('username')?.invalid && userForm.get('username')?.touched" class="text-red-400 text-sm mt-1">
+                                Username is required
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="name" class="block text-gray-400 mb-1">Name</label>
+                            <input
+                                    type="text"
+                                    id="name"
+                                    formControlName="name"
+                                    class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                            />
+                            <div *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched" class="text-red-400 text-sm mt-1">
+                                Name is required
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-gray-400 mb-1">Email</label>
+                            <input
+                                    type="email"
+                                    id="email"
+                                    formControlName="email"
+                                    class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                            />
+                            <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="text-red-400 text-sm mt-1">
+                                Valid email is required
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-gray-400 mb-1">
+                                Password {{ isEditing ? '(leave blank to keep current)' : '' }}
+                            </label>
+                            <input
+                                    type="password"
+                                    id="password"
+                                    formControlName="password"
+                                    class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                            />
+                            <div *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="text-red-400 text-sm mt-1">
+                                Password is required
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="avatarUrl" class="block text-gray-400 mb-1">Avatar URL</label>
+                            <input
+                                    type="text"
+                                    id="avatarUrl"
+                                    formControlName="avatarUrl"
+                                    class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                            />
+                        </div>
+
+                        <div>
+                            <label for="points" class="block text-gray-400 mb-1">Points</label>
+                            <input
+                                    type="number"
+                                    id="points"
+                                    formControlName="points"
+                                    class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                            />
+                        </div>
+
+                        <div>
+                            <label for="role" class="block text-gray-400 mb-1">Role</label>
+                            <select
+                                    id="role"
+                                    formControlName="role"
+                                    class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+                            >
+                                <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <a
+                                routerLink="/admin/users"
+                                class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded mr-2">
+                            Cancel
+                        </a>
+                        <button
+                                type="submit"
+                                [disabled]="userForm.invalid || loading"
+                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                                [ngClass]="{'opacity-50': userForm.invalid || loading}"
+                        >
+              <span *ngIf="loading">
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+              </span>
+                            {{ isEditing ? 'Update' : 'Create' }} User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { TokenService } from './token.service';
 import { inject } from '@angular/core';
+import {User} from "../models/user.model";
 
 @Injectable({
   providedIn: 'root'
@@ -110,4 +111,9 @@ export class AuthService {
   }
 
   private errorMessage: string = '';
+
+  updateUserProfile(userId: number, userData: FormData): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/${userId}`, userData);
+  }
+
 }

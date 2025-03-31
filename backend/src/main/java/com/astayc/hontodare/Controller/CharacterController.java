@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/character")
+@CrossOrigin(origins = "http://localhost:4200")
+
 public class CharacterController {
 
     @Autowired
@@ -74,8 +76,8 @@ public class CharacterController {
                 // Generate unique filename
                 String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
-                // Create directory if it doesn't exist
-                Path uploadPath = Paths.get("uploads");
+                // Set path to frontend/src/assets/characterPic
+                Path uploadPath = Paths.get("frontend/src/assets/characterPic");
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
@@ -83,11 +85,11 @@ public class CharacterController {
                 // Save file
                 Files.write(uploadPath.resolve(fileName), file.getBytes());
 
-                // Set URL in character
-                characterDTO.setPicUrl("/uploads/" + fileName);
+                // Set URL in character - referencing assets folder for frontend
+                characterDTO.setPicUrl("/assets/characterPic/" + fileName);
             }
 
-//             Save character
+            // Save character
             CharacterDTO savedCharacter = characterService.createCharacter(characterDTO);
 
             // Track this upload
@@ -127,7 +129,6 @@ public class CharacterController {
                     .body(Map.of("error", "An unexpected error occurred: " + e.getMessage()));
         }
     }
-
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCharacter(@PathVariable Long id, @RequestBody CharacterDTO characterDTO) {
         try {

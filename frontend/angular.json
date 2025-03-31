@@ -87,7 +87,9 @@
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/assets/characterPic",
+              "src/assets/userPic"
             ],
             "styles": [
               "src/styles.css"

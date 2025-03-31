@@ -1,0 +1,6 @@
+/* Transition for sidebar width */
+:host {
+  display: block;
+  transition: width 0.3s ease;
+}
+

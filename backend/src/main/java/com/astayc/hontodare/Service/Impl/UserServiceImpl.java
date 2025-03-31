@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -74,4 +75,48 @@ public class UserServiceImpl implements UserService {
 
         return modelMapper.map(user, UserDTO.class);
     }
+
+    @Override
+    public List<UserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(user -> modelMapper.map(user, UserDTO.class))
+                .toList();
+    }
+
+    @Override
+    public UserDTO updateUser(Long id, UserDTO userDTO) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+
+        // Check username and email uniqueness...
+
+        // Update fields
+        existingUser.setUsername(userDTO.getUsername());
+        existingUser.setEmail(userDTO.getEmail());
+        existingUser.setName(userDTO.getName());
+        existingUser.setPoints(userDTO.getPoints());
+
+        // Update avatar URL if provided
+        if (userDTO.getAvatarUrl() != null) {
+            existingUser.setAvatarUrl(userDTO.getAvatarUrl());
+        }
+
+        // Admin can update roles
+        if (userDTO.getRole() != null) {
+            existingUser.setRole(Role.valueOf(userDTO.getRole()));
+        }
+
+        User updatedUser = userRepository.save(existingUser);
+        return modelMapper.map(updatedUser, UserDTO.class);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UsernameNotFoundException("User not found with id: " + id);
+        }
+        userRepository.deleteById(id);
+    }
+
 }

@@ -1,0 +1,137 @@
+<!-- src/app/features/admin/characters/character-form/character-form.component.html -->
+<div class="flex h-screen bg-gray-900">
+  <!-- Sidebar -->
+  <app-admin-sidebar></app-admin-sidebar>
+
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <app-admin-header></app-admin-header>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-2xl font-kill-the-noise text-red-600">{{ isEditing ? 'Edit Character' : 'Create Character' }}</h1>
+        <a routerLink="/admin/characters" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">
+          <i class="fas fa-arrow-left mr-2"></i> Back to Characters
+        </a>
+      </div>
+
+      <div class="bg-gray-800 rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+        <form [formGroup]="characterForm" (ngSubmit)="onSubmit()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Character Name -->
+            <div>
+              <label for="name" class="block text-gray-400 mb-1">Character Name</label>
+              <input
+                type="text"
+                id="name"
+                formControlName="name"
+                class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+              />
+              <div *ngIf="characterForm.get('name')?.invalid && characterForm.get('name')?.touched" class="text-red-400 text-sm mt-1">
+                Character name is required
+              </div>
+            </div>
+
+            <!-- Room Selection (which sets the category automatically) -->
+            <div>
+              <label for="roomId" class="block text-gray-400 mb-1">Room</label>
+              <select
+                id="roomId"
+                formControlName="roomId"
+                class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+              >
+                <option [value]="null">Select a room</option>
+                <option *ngFor="let room of rooms" [value]="room.id">{{ room.name }} ({{ room.category }})</option>
+              </select>
+            </div>
+
+            <!-- Category (auto-filled from room) -->
+            <div>
+              <label for="category" class="block text-gray-400 mb-1">Category</label>
+              <input
+                type="text"
+                id="category"
+                formControlName="category"
+                readonly
+                class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 opacity-75"
+              />
+              <div *ngIf="characterForm.get('category')?.invalid && characterForm.get('category')?.touched" class="text-red-400 text-sm mt-1">
+                Category is required
+              </div>
+            </div>
+
+            <!-- User Assignment -->
+            <div>
+              <label for="userId" class="block text-gray-400 mb-1">Assign to User</label>
+              <select
+                id="userId"
+                formControlName="userId"
+                class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+              >
+                <option [value]="null">Select a user</option>
+                <option *ngFor="let user of users" [value]="user.id">{{ user.name }} ({{ user.username }})</option>
+              </select>
+            </div>
+
+            <!-- Glance Description -->
+            <div class="md:col-span-2">
+              <label for="glance" class="block text-gray-400 mb-1">Glance Description</label>
+              <textarea
+                id="glance"
+                formControlName="glance"
+                rows="3"
+                class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
+              ></textarea>
+              <div *ngIf="characterForm.get('glance')?.invalid && characterForm.get('glance')?.touched" class="text-red-400 text-sm mt-1">
+                Glance description is required
+              </div>
+            </div>
+
+            <!-- Character Image Upload -->
+            <div class="md:col-span-2">
+              <label for="characterImage" class="block text-gray-400 mb-1">Character Image</label>
+              <div class="flex items-center space-x-4">
+                <div *ngIf="imagePreview" class="h-24 w-24 rounded-lg overflow-hidden bg-gray-700">
+                  <img [src]="imagePreview" class="h-full w-full object-cover" alt="Character preview">
+                </div>
+                <div class="flex-1">
+                  <input
+                    type="file"
+                    id="characterImage"
+                    (change)="onFileSelected($event)"
+                    accept="image/*"
+                    class="hidden"
+                  />
+                  <label for="characterImage" class="cursor-pointer bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded inline-block">
+                    <i class="fas fa-upload mr-2"></i> {{ imagePreview ? 'Change Image' : 'Upload Image' }}
+                  </label>
+                  <p class="text-gray-400 text-sm mt-1">JPG, PNG or GIF, max 2MB</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <a
+              routerLink="/admin/characters"
+              class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded mr-2">
+              Cancel
+            </a>
+            <button
+              type="submit"
+              [disabled]="characterForm.invalid || loading"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+              [ngClass]="{'opacity-50': characterForm.invalid || loading}"
+            >
+              <span *ngIf="loading">
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+              </span>
+              {{ isEditing ? 'Update' : 'Create' }} Character
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

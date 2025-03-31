@@ -48,7 +48,7 @@ export class LoginComponent {
           this.tokenService.saveToken(response);
 
           if(this.tokenService.getUserRole() == 'ADMIN'){
-            this.router.navigate(['/admin/dashboard']);
+            this.router.navigate(['/admin/rooms']);
           }else if (this.tokenService.getUserRole() === 'EMPLOYEE'){
             this.router.navigate(['/employee/dashboard']);
           } else{

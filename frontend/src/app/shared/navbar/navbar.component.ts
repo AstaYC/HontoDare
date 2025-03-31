@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterModule } from "@angular/router"
 import { CommonModule } from "@angular/common"
+import {AuthService} from "../../core/services/auth.service";
 
 
 @Component({
@@ -15,6 +16,12 @@ import { CommonModule } from "@angular/common"
 })
 export class NavbarComponent {
   isMenuOpen = false
+
+  constructor(private authService: AuthService) {}
+
+  get isAuthenticated(): boolean {
+    return this.authService.isAuthenticated();
+  }
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen

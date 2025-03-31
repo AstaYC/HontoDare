@@ -1,0 +1,5 @@
+/* src/app/features/admin/characters/character-form/character-form.component.css */
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+}

@@ -49,6 +49,13 @@ public class ChatController {
                     messagingTemplate.convertAndSend("/topic/free-chat", chatMessage);
                 }
                 break;
+            case SYSTEM_MESSAGE: // Add this case
+                if (roomId != null) {
+                    messagingTemplate.convertAndSend("/topic/room/" + roomId + "/free", chatMessage);
+                } else {
+                    messagingTemplate.convertAndSend("/topic/system-messages", chatMessage);
+                }
+                break;
             default:
                 throw new IllegalArgumentException("Unknown message type: " + type);
         }

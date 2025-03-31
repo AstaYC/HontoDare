@@ -2,7 +2,11 @@ package com.astayc.hontodare.Controller;
 
 import com.astayc.hontodare.DTO.GameDTO;
 import com.astayc.hontodare.Entity.Enum.GameMode;
+import com.astayc.hontodare.Entity.Game;
+import com.astayc.hontodare.Repository.GameRepository;
 import com.astayc.hontodare.Service.GameService;
+import com.astayc.hontodare.Service.Impl.MatchTrackingService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +14,8 @@ import com.astayc.hontodare.Entity.Enum.GameMode;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 
 @RestController
@@ -19,24 +25,50 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
+    @Autowired
+    private GameRepository gameRepository;
+
+    @Autowired
+    private MatchTrackingService matchTrackingService;
+
+
+    @Autowired
+    private ModelMapper modelMapper;
+
     @GetMapping
     public List<GameDTO> getAllGames() {
         return gameService.getAllGames();
     }
 
-    @PostMapping("/start")
-    public ResponseEntity<GameDTO> startGame(@RequestBody GameDTO gameDTO) {
-        gameDTO.setGameMode(GameMode.PvsP);
+    @PostMapping("/complete")
+    public ResponseEntity<GameDTO> completeGame(@RequestBody GameDTO gameDTO) {
+        try {
+            // Check if an unfinished game exists for these players
+            Optional<Game> existingGame = gameRepository.findUnfinishedGameForPlayers(
+                    gameDTO.getRoomId(),
+                    gameDTO.getPlayer1Id(),
+                    gameDTO.getPlayer2Id()
+            );
 
-        if (gameDTO.getStartTime() == null) {
-            gameDTO.setStartTime(new Timestamp(System.currentTimeMillis()));
+            if (existingGame.isPresent()) {
+                // Update existing game with character2
+                Game game = existingGame.get();
+                GameDTO updateDTO = modelMapper.map(game, GameDTO.class);
+
+                // Update the DTO
+                updateDTO.setCharacter2Id(gameDTO.getCharacter2Id());
+                updateDTO.setEndTime(new Timestamp(System.currentTimeMillis()));
+                return ResponseEntity.ok(gameService.updateGame(updateDTO));
+            } else {
+                gameDTO.setStartTime(new Timestamp(System.currentTimeMillis()));
+                gameDTO.setEndTime(new Timestamp(System.currentTimeMillis()));
+                gameDTO.setGameMode(GameMode.PvsP);
+                return ResponseEntity.ok(gameService.createGame(gameDTO));
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Add this for debugging
+            return ResponseEntity.status(500).build();
         }
-
-        gameDTO.setWinnerId(null);
-        gameDTO.setEndTime(null);
-
-        GameDTO createdGameDTO = gameService.createGame(gameDTO);
-        return ResponseEntity.ok(createdGameDTO);
     }
 
     @PutMapping("/{gameId}")
@@ -89,5 +121,28 @@ public class GameController {
     public ResponseEntity<Void> deleteGame(@PathVariable Long gameId) {
         gameService.deleteGame(gameId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{gameId}/update-character")
+    public ResponseEntity<GameDTO> updateGameCharacter(
+            @PathVariable Long gameId,
+            @RequestParam Long playerId,
+            @RequestParam Long characterId
+    ) {
+        GameDTO gameDTO = gameService.getGameById(gameId);
+
+        if (gameDTO == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Update the appropriate character ID based on player position
+        if (playerId.equals(gameDTO.getPlayer1Id())) {
+            gameDTO.setCharacter1Id(characterId);
+        } else if (playerId.equals(gameDTO.getPlayer2Id())) {
+            gameDTO.setCharacter2Id(characterId);
+        }
+
+        GameDTO updatedGame = gameService.updateGame(gameDTO);
+        return ResponseEntity.ok(updatedGame);
     }
 }

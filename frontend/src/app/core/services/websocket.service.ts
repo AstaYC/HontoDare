@@ -38,7 +38,7 @@ export class WebSocketService {
     private http: HttpClient,
     private gameService: GameService
 
-) {
+  ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
     if (this.isBrowser) {
@@ -96,15 +96,25 @@ export class WebSocketService {
         this.stompClient.debug = () => {};
 
         this.stompClient.connect({}, () => {
+          console.log('Connected to WebSocket');
           this.connected = true;
-          this.subscribeToTopic('/topic/public');
-          this.subscribeToTopic('/topic/match-updates');
+
+          // Track this connection in our map
           if (roomId) {
-            this.subscribeToTopic(`/topic/room/${roomId}`);
-            this.sendJoinRoomMessage(roomId, username);
+            if (!this.activeConnectionsByUser.has(username)) {
+              this.activeConnectionsByUser.set(username, new Set());
+            }
+            this.activeConnectionsByUser.get(username)!.add(roomId);
           }
+
+          // Subscribe to any pending topics
+          this.messageSubjects.forEach((subject, topic) => {
+            this.subscribeToClient(topic, subject);
+          });
+
           resolve();
         }, (error: any) => {
+          console.error('WebSocket connection error:', error);
           this.connected = false;
           reject(error);
         });
@@ -114,7 +124,6 @@ export class WebSocketService {
       }
     });
   }
-
   sendJoinRoomMessage(roomId: number, playerId: string): void {
     if (this.stompClient) {
       const joinMessage = {
@@ -180,6 +189,7 @@ export class WebSocketService {
   }
 
   subscribe(topic: string): Subject<any> {
+    // Check if we already have a subject for this topic
     if (!this.messageSubjects.has(topic)) {
       const subject = new Subject<any>();
       this.messageSubjects.set(topic, subject);
@@ -188,7 +198,7 @@ export class WebSocketService {
       if (this.stompClient && this.stompClient.connected) {
         this.subscribeToClient(topic, subject);
       } else {
-        console.log(`StompClient not available for topic ${topic}`);
+        console.log(`StompClient not available for topic ${topic}, will subscribe when connected`);
       }
     }
 
@@ -198,13 +208,17 @@ export class WebSocketService {
   private subscribeToClient(topic: string, subject: Subject<any>): void {
     if (!this.stompClient || !this.stompClient.connected) return;
 
-    this.stompClient.subscribe(topic, (message: any) => {
-      const parsedMessage = JSON.parse(message.body);
-      console.log(`Received message on topic ${topic}:`, parsedMessage);
-      subject.next(parsedMessage);
-    }, (error: any) => {
-      console.error(`Subscription to topic ${topic} failed:`, error);
+    const subscription = this.stompClient.subscribe(topic, (message: any) => {
+      try {
+        const parsedMessage = JSON.parse(message.body);
+        console.log(`Received message on topic ${topic}:`, parsedMessage);
+        subject.next(parsedMessage);
+      } catch (error) {
+        console.error(`Error parsing message on topic ${topic}:`, error);
+      }
     });
+
+    console.log(`Successfully subscribed to topic ${topic}`);
   }
 
   private subscribeToTopic(topic: string): void {
@@ -319,53 +333,51 @@ export class WebSocketService {
   }
 
 
-  trackGameStart(roomId: number, player1Id: string, player2Id: string): Promise<void> {
+  // Modify completeGame method to handle both scenarios
+  async completeGame(roomId: number, winnerId: string, loserId: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      // Retrieve character IDs from localStorage if available
-      const character1Id = localStorage.getItem(`character_${roomId}_${player1Id}`);
-      const character2Id = localStorage.getItem(`character_${roomId}_${player2Id}`);
+      // Get character IDs from localStorage
+      const winnerCharacterId = localStorage.getItem(`character_${roomId}_${winnerId}`);
+      const loserCharacterId = localStorage.getItem(`character_${roomId}_${loserId}`);
 
-      console.log('Character IDs from localStorage:', {
-        character1Id,
-        character2Id,
-        player1Id,
-        player2Id,
-        roomId
-      });
-
-      // Create the game data with ALL required fields matching backend expectations
+      // Create game data
       const gameData = {
         roomId: Number(roomId),
-        player1Id: Number(player1Id),
-        player2Id: Number(player2Id),
-        character1Id: character1Id ? Number(character1Id) : 1,
-        character2Id: character2Id ? Number(character2Id) : 2,
-        startTime: new Date()
+        player1Id: Number(winnerId),
+        player2Id: Number(loserId),
+        character1Id: winnerCharacterId ? Number(winnerCharacterId) : null,
+        character2Id: loserCharacterId ? Number(loserCharacterId) : null,
+        startTime: new Date(),
+        endTime: new Date(),
+        gameMode: "PvsP",
+        winnerId: Number(winnerId)
       };
 
-      console.log('Sending game data to backend:', gameData);
-
-      this.gameService.startGame(gameData).subscribe({
-        next: (response) => {
-          console.log('Game created successfully in database:', response);
-          localStorage.setItem(`game_${roomId}`, JSON.stringify(response));
-          resolve();
-        },
-        error: (error) => {
-          console.error('Failed to create game in database:', error);
-          // Examine the error details
-          console.error('Error details:', {
-            status: error.status,
-            message: error.message,
-            error: error.error
-          });
-          // Despite error, resolve promise to continue game flow
-          resolve();
-        }
+      this.http.post<any>(`${this.apiUrl}/api/game/complete`, gameData).subscribe({
+        next: (response) => resolve(response),
+        error: (error) => reject(error)
       });
     });
   }
 
+// Add method to update character
+  updateGameCharacter(gameId: number, playerId: string, characterId: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.http.put<any>(
+        `${this.apiUrl}/api/game/${gameId}/update-character`,
+        {},
+        {
+          params: {
+            playerId: playerId,
+            characterId: characterId.toString()
+          }
+        }
+      ).subscribe({
+        next: (response) => resolve(response),
+        error: (error) => reject(error)
+      });
+    });
+  }
   getCharacterUploadsForRoom(roomId: number): string[] {
     return Array.from(this.characterUploads.get(roomId) || []);
   }

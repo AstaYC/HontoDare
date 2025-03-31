@@ -36,6 +36,13 @@
           <li>
             <a routerLink="/contact" routerLinkActive="text-red-500" class="font-samurai text-white hover:text-red-500 transition-colors">Contact</a>
           </li>
+
+          <!-- In your navbar component's HTML -->
+          <li class="nav-item" *ngIf="isAuthenticated">
+            <a class="nav-link" routerLink="/profile" routerLinkActive="active">
+              <i class="fas fa-user-circle"></i> Profile
+            </a>
+          </li>
         </ul>
       </nav>
 

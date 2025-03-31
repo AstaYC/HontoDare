@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import {Character} from "../models/character.model";
 
 @Injectable({
   providedIn: 'root'
@@ -16,19 +17,27 @@ export class CharacterService {
     return this.http.post(`${this.apiUrl}/upload`, formData);
   }
 
-  getAllCharacters(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/all`);
+  getAllCharacters(): Observable<Character[]> {
+    return this.http.get<Character[]>(this.apiUrl);
   }
 
-  getCharacterById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  getCharacterById(id: number): Observable<Character> {
+    return this.http.get<Character>(`${this.apiUrl}/${id}`);
   }
 
-  updateCharacter(id: number, character: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, character);
+  getCharactersByCategory(category: string): Observable<Character[]> {
+    return this.http.get<Character[]>(`${this.apiUrl}/category/${category}`);
   }
 
-  deleteCharacter(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  createCharacter(formData: FormData): Observable<Character> {
+    return this.http.post<Character>(`${this.apiUrl}/upload`, formData);
+  }
+
+  updateCharacter(id: number, character: Character): Observable<Character> {
+    return this.http.put<Character>(`${this.apiUrl}/${id}`, character);
+  }
+
+  deleteCharacter(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

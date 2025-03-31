@@ -1,0 +1,30 @@
+<div class="defeat-overlay" @fadeIn>
+  <div class="defeat-container" @slideUp>
+    <!-- Sukuna background effect -->
+    <div class="sukuna-background"></div>
+
+    <!-- Top Sukuna image -->
+    <div class="top-sukuna">
+      <img src="assets/img/sukuna-stay.gif" alt="Sukuna" class="sukuna-top-image" @sukunaAnimation>
+    </div>
+
+    <!-- Defeat text -->
+    <div class="defeat-text">
+      <h1 style="font-size: 250%;" class="font-samurai text-red-600">HONORABLE DEFEAT</h1>
+      <h2  style="font-size : 350%" class="font-kill-the-noise text-red-500">"Stand proud, you're strong."</h2>
+      <div class="red-line"></div>
+      <p class="text-xl text-white mt-4 font-kill-the-noise">{{ playerName }}, you fought well.</p>
+      <p class="text-lg text-gray-300 mt-6 font-samurai">RETURNING TO HOME IN {{ countdown }} SECONDS...</p>
+    </div>
+
+    <!-- Flame effects -->
+    <div class="flames-container">
+      <div class="flame flame-1"></div>
+      <div class="flame flame-2"></div>
+      <div class="flame flame-3"></div>
+      <div class="flame flame-4"></div>
+      <div class="flame flame-5"></div>
+    </div>
+  </div>
+</div>
+

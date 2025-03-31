@@ -67,6 +67,27 @@
     </div>
   </div>
 
+  <div class="mt-6 mb-4 flex justify-center">
+    <button
+      *ngIf="!gameEnded"
+      (click)="claimVictory()"
+      class="bg-red-700 hover:bg-red-800 text-white font-samurai py-2 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform">
+      <i class="fas fa-trophy mr-2"></i> NAH, I'D WIN!
+    </button>
+
+    <button *ngIf="!gameEnded"
+            (click)="concedeDefeat()"
+            class="bg-blue-700 hover:bg-blue-800 text-white font-samurai py-2 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform ml-4">
+      <i class="fas fa-flag mr-2"></i> I LOSE
+    </button>
+
+
+    <div *ngIf="gameEnded && !showVictoryModal && !showDefeatModal" class="bg-gray-800/80 border border-yellow-600 rounded-md p-4 text-center">
+      <div class="text-yellow-500 font-samurai text-xl mb-2">VICTORY CLAIMED</div>
+      <div class="text-white">{{winner}} has claimed victory in this match!</div>
+    </div>
+  </div>
+
   <!-- Chat Area -->
   <div class="container mx-auto px-4 py-6">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -246,4 +267,12 @@
       </div>
     </div>
   </div>
+
+  <!-- Victory Modal -->
+  <app-victory-modal *ngIf="showVictoryModal" [playerName]="playerName"></app-victory-modal>
+
+  <!-- Defeat Modal -->
+  <app-defeat-modal *ngIf="showDefeatModal" [playerName]="playerName"></app-defeat-modal>
 </div>
+
+

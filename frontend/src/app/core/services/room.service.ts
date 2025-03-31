@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { HttpHeaders } from '@angular/common/http';
+import {Room} from "../models/room.model";
 
 @Injectable({
   providedIn: 'root'
@@ -33,5 +34,19 @@ export class RoomService {
 
   getRoomUsers(roomId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/api/waiting/${roomId}/users`);
+  }
+
+
+
+  createRoom(room: Room): Observable<Room> {
+    return this.http.post<Room>(`${this.apiUrl}/api/rooms`, room);
+  }
+
+  updateRoom(room: Room): Observable<Room> {
+    return this.http.put<Room>(`${this.apiUrl}/api/rooms`, room);
+  }
+
+  deleteRoom(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/api/rooms/${id}`);
   }
 }
