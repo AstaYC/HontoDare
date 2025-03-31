@@ -5,4 +5,5 @@ export interface Room {
   description: string;
   maxPlayers: string;
   category: string;
+  roomPicUrl?: string;
 }

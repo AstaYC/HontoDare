@@ -12,4 +12,5 @@ public class RoomDTO {
     private String description;
     private String maxPlayers;
     private String category;
+    private String roomPicUrl;
 }

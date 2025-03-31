@@ -49,4 +49,12 @@ export class RoomService {
   deleteRoom(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/api/rooms/${id}`);
   }
+
+  createRoomWithImage(formData: FormData): Observable<Room> {
+    return this.http.post<Room>(`${this.apiUrl}/api/rooms`, formData);
+  }
+
+  updateRoomWithImage(id: number, formData: FormData): Observable<Room> {
+    return this.http.put<Room>(`${this.apiUrl}/api/rooms/${id}`, formData);
+  }
 }

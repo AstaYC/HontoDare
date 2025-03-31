@@ -8,6 +8,7 @@ import { User } from '../../../../core/models/user.model';
 import { AdminHeaderComponent } from '../../admin-header/admin-header.component';
 import { AdminSidebarComponent } from '../../admin-sidebar/admin-sidebar.component';
 import { HttpClientModule } from '@angular/common/http';
+import {environment} from "../../../../../environments/environment";
 
 @Component({
     selector: 'app-user-form',
@@ -88,39 +89,51 @@ export class UserFormComponent implements OnInit {
         });
     }
 
-    onSubmit(): void {
-        if (this.userForm.invalid) return;
+  onSubmit(): void {
+    if (this.userForm.invalid) return;
 
-        const userData = this.userForm.value as User;
-        this.loading = true;
+    const userData = {...this.userForm.value} as User;
+    this.loading = true;
 
-        if (this.isEditing && this.userId) {
-            userData.id = this.userId;
+    if (this.isEditing && this.userId) {
+      userData.id = this.userId;
 
-            // Remove password if empty
-            if (!userData.password) {
-                delete userData.password;
-            }
+      // Remove password if empty
+      if (!userData.password) {
+        delete userData.password;
+      }
 
-            this.userService.updateUser(userData).subscribe({
-                next: () => {
-                    this.router.navigate(['/admin/users']);
-                },
-                error: (error) => {
-                    console.error('Error updating user:', error);
-                    this.loading = false;
-                }
-            });
-        } else {
-            this.userService.createUser(userData).subscribe({
-                next: () => {
-                    this.router.navigate(['/admin/users']);
-                },
-                error: (error) => {
-                    console.error('Error creating user:', error);
-                    this.loading = false;
-                }
-            });
+      // Remove avatarUrl from direct updates
+      // We want this to be controlled by file uploads only
+      delete userData.avatarUrl;
+
+      this.userService.updateUser(userData).subscribe({
+        next: () => {
+          this.router.navigate(['/admin/users']);
+        },
+        error: (error) => {
+          console.error('Error updating user:', error);
+          this.loading = false;
         }
+      });
+    } else {
+      this.userService.createUser(userData).subscribe({
+        next: () => {
+          this.router.navigate(['/admin/users']);
+        },
+        error: (error) => {
+          console.error('Error creating user:', error);
+          this.loading = false;
+        }
+      });
     }
+
+  }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return environment.apiUrl + path;
+  }
+
 }

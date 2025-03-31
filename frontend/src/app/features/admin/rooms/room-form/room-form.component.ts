@@ -8,6 +8,7 @@ import { Room } from '../../../../core/models/room.model';
 import { AdminHeaderComponent } from '../../admin-header/admin-header.component';
 import { AdminSidebarComponent } from '../../admin-sidebar/admin-sidebar.component';
 import { HttpClientModule } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-room-form',
@@ -28,6 +29,8 @@ export class RoomFormComponent implements OnInit {
   isEditing = false;
   roomId: number | null = null;
   loading = false;
+  selectedFile: File | null = null;
+  previewUrl: string | null = null;
 
   // Predefined categories - you may want to load these from an API
   categories = ['Action', 'Adventure', 'RPG', 'Strategy', 'Puzzle'];
@@ -56,15 +59,14 @@ export class RoomFormComponent implements OnInit {
       name: ['', Validators.required],
       description: ['', Validators.required],
       maxPlayers: ['2', [Validators.required, Validators.pattern(/^\d+$/)]],
-      category: ['', Validators.required]
+      category: ['', Validators.required],
+      roomPicUrl: ['']
     });
   }
 
   loadRoom(id: number): void {
     this.loading = true;
 
-    // Find room in the list - this approach assumes you might have rooms loaded elsewhere
-    // For a real app, you might want to add a getRoomById method to your service
     this.roomService.getRooms().subscribe({
       next: (rooms) => {
         const room = rooms.find(r => r.id === id);
@@ -73,8 +75,13 @@ export class RoomFormComponent implements OnInit {
             name: room.name,
             description: room.description,
             maxPlayers: room.maxPlayers,
-            category: room.category
+            category: room.category,
+            roomPicUrl: room.roomPicUrl || ''
           });
+
+          if (room.roomPicUrl) {
+            this.previewUrl = this.getImageUrl(room.roomPicUrl);
+          }
         } else {
           console.error('Room not found');
           this.router.navigate(['/admin/rooms']);
@@ -89,15 +96,44 @@ export class RoomFormComponent implements OnInit {
     });
   }
 
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+
+      // Create preview for the selected file
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('/assets')) return path; // Assets are served directly
+    return environment.apiUrl + path;
+  }
+
   onSubmit(): void {
     if (this.roomForm.invalid) return;
 
-    const roomData = this.roomForm.value as Room;
     this.loading = true;
+    const roomData = this.roomForm.value as Room;
+    const formData = new FormData();
+
+    // Convert roomData to JSON and append to FormData
+    formData.append('roomData', JSON.stringify(roomData));
+
+    // Add file if selected
+    if (this.selectedFile) {
+      formData.append('roomPic', this.selectedFile);
+    }
 
     if (this.isEditing && this.roomId) {
-      roomData.id = this.roomId;
-      this.roomService.updateRoom(roomData).subscribe({
+      this.roomService.updateRoomWithImage(this.roomId, formData).subscribe({
         next: () => {
           this.router.navigate(['/admin/rooms']);
         },
@@ -107,7 +143,7 @@ export class RoomFormComponent implements OnInit {
         }
       });
     } else {
-      this.roomService.createRoom(roomData).subscribe({
+      this.roomService.createRoomWithImage(formData).subscribe({
         next: () => {
           this.router.navigate(['/admin/rooms']);
         },

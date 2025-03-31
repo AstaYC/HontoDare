@@ -50,13 +50,31 @@
             <tr *ngIf="loading">
               <td colspan="5" class="py-8 text-center text-gray-400">Loading rooms...</td>
             </tr>
+            <!-- src/app/features/admin/rooms/room-list/room-list.component.html -->
+            <!-- Update the table rows in the room-list component -->
+
             <tr *ngFor="let room of rooms" class="border-b border-gray-700 hover:bg-gray-700">
-              <td class="py-3 px-4 text-white font-medium">{{ room.name }}</td>
+              <td class="py-3 px-4">
+                <div class="flex items-center">
+                  <!-- Room Image -->
+                  <div class="h-10 w-10 bg-gray-700 rounded overflow-hidden mr-3">
+                    <img *ngIf="room.roomPicUrl"
+                         [src]="getImageUrl(room.roomPicUrl)"
+                         alt="Room thumbnail"
+                         class="w-full h-full object-cover">
+                    <div *ngIf="!room.roomPicUrl" class="h-full w-full flex items-center justify-center text-gray-400">
+                      <i class="fas fa-gamepad"></i>
+                    </div>
+                  </div>
+                  <!-- Room Name -->
+                  <span class="text-white font-medium">{{ room.name }}</span>
+                </div>
+              </td>
               <td class="py-3 px-4 text-white">{{ room.description }}</td>
               <td class="py-3 px-4">
-                  <span class="px-2 py-1 rounded text-xs bg-blue-900 text-blue-200">
-                    {{ room.category }}
-                  </span>
+    <span class="px-2 py-1 rounded text-xs bg-blue-900 text-blue-200">
+      {{ room.category }}
+    </span>
               </td>
               <td class="py-3 px-4 text-white">{{ room.maxPlayers }}</td>
               <td class="py-3 px-4">

@@ -30,4 +30,6 @@ public class Room {
     @Column(nullable = false)
     private String category;
 
+    private String roomPicUrl;
+
 }

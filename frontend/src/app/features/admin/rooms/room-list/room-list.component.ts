@@ -7,6 +7,7 @@ import { Room } from '../../../../core/models/room.model';
 import { AdminHeaderComponent } from '../../admin-header/admin-header.component';
 import { AdminSidebarComponent } from '../../admin-sidebar/admin-sidebar.component';
 import { HttpClientModule } from '@angular/common/http';
+import {environment} from "../../../../../environments/environment";
 
 @Component({
   selector: 'app-room-list',
@@ -77,5 +78,12 @@ export class RoomAdminListComponent implements OnInit {
         }
       });
     }
+  }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('/assets')) return path; // Assets are served directly
+    return environment.apiUrl + path;
   }
 }

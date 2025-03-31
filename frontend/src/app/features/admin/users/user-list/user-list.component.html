@@ -35,12 +35,12 @@
                         <tr *ngFor="let user of users" class="border-b border-gray-700 hover:bg-gray-700">
                             <td class="py-3 px-4">
                                 <div class="flex items-center space-x-3">
-                                    <div class="avatar-container h-10 w-10 bg-gray-700">
-                                        <img *ngIf="user.avatarUrl" [src]="user.avatarUrl" alt="User avatar" class="h-full w-full object-cover">
-                                        <div *ngIf="!user.avatarUrl" class="h-full w-full flex items-center justify-center text-gray-400">
-                                            <i class="fas fa-user"></i>
-                                        </div>
+                                  <div class="avatar-container h-10 w-10 bg-gray-700">
+                                    <img *ngIf="user.avatarUrl" [src]="getImageUrl(user.avatarUrl)" alt="User avatar" class="h-full w-full object-cover">
+                                    <div *ngIf="!user.avatarUrl" class="h-full w-full flex items-center justify-center text-gray-400">
+                                      <i class="fas fa-user"></i>
                                     </div>
+                                  </div>
                                     <div>
                                         <div class="font-medium text-white">{{ user.name }}</div>
                                         <div class="text-sm text-gray-400">{{ user.username }}</div>

@@ -7,6 +7,7 @@ import { User } from '../../../../core/models/user.model';
 import { AdminHeaderComponent } from '../../admin-header/admin-header.component';
 import { AdminSidebarComponent } from '../../admin-sidebar/admin-sidebar.component';
 import { HttpClientModule } from '@angular/common/http';
+import {environment} from "../../../../../environments/environment";
 
 @Component({
     selector: 'app-user-list',
@@ -57,4 +58,11 @@ export class UserListComponent implements OnInit {
             });
         }
     }
+
+  // In
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return environment.apiUrl + path;
+  }
 }
