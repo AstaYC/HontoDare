@@ -1,4 +1,7 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8082'
+  apiUrl: 'http://localhost:8082',
+  wsDebug: true
 };
+
+

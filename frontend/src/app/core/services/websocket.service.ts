@@ -335,10 +335,14 @@ export class WebSocketService {
 
   // Modify completeGame method to handle both scenarios
   async completeGame(roomId: number, winnerId: string, loserId: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+    try {
+      console.log(`Completing game - Room: ${roomId}, Winner: ${winnerId}, Loser: ${loserId}`);
+
       // Get character IDs from localStorage
       const winnerCharacterId = localStorage.getItem(`character_${roomId}_${winnerId}`);
       const loserCharacterId = localStorage.getItem(`character_${roomId}_${loserId}`);
+
+      console.log(`Character IDs - Winner: ${winnerCharacterId}, Loser: ${loserCharacterId}`);
 
       // Create game data
       const gameData = {
@@ -353,11 +357,24 @@ export class WebSocketService {
         winnerId: Number(winnerId)
       };
 
-      this.http.post<any>(`${this.apiUrl}/api/game/complete`, gameData).subscribe({
-        next: (response) => resolve(response),
-        error: (error) => reject(error)
+      console.log('Sending game completion data:', gameData);
+
+      return new Promise((resolve, reject) => {
+        this.http.post<any>(`${this.apiUrl}/api/game/complete`, gameData).subscribe({
+          next: (response) => {
+            console.log('Game completion successful:', response);
+            resolve(response);
+          },
+          error: (error) => {
+            console.error('Game completion API error:', error);
+            reject(error);
+          }
+        });
       });
-    });
+    } catch (error) {
+      console.error('Error in completeGame:', error);
+      return Promise.reject(error);
+    }
   }
 
 // Add method to update character

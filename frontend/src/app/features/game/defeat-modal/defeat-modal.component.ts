@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // Remove "type" keyword
-import { trigger, transition, style, animate } from '@angular/animations';
+import { Router } from '@angular/router';
+import { trigger, transition, style, animate, keyframes } from '@angular/animations';
 
 @Component({
   selector: 'app-defeat-modal',
@@ -10,22 +10,29 @@ import { trigger, transition, style, animate } from '@angular/animations';
   templateUrl: './defeat-modal.component.html',
   styleUrls: ['./defeat-modal.component.css'],
   animations: [
-    trigger('fadeIn', [transition(':enter', [style({ opacity: 0 }), animate('500ms ease-in', style({ opacity: 1 }))])]),
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('500ms ease-in', style({ opacity: 1 }))
+      ])
+    ]),
     trigger('slideUp', [
       transition(':enter', [
         style({ transform: 'translateY(100%)' }),
-        animate('800ms ease-out', style({ transform: 'translateY(0)' })),
-      ]),
+        animate('800ms ease-out', style({ transform: 'translateY(0)' }))
+      ])
     ]),
-    trigger('pulse', [
+    trigger('sukunaAnimation', [
       transition(':enter', [
-        style({ transform: 'scale(0.8)' }),
-        animate('600ms 300ms ease-out', style({ transform: 'scale(1)' })),
-      ]),
-    ]),
-  ],
+        animate('3s ease-in-out', keyframes([
+          style({ transform: 'scale(0.95)', offset: 0 }),
+          style({ transform: 'scale(1.05)', offset: 0.5 }),
+          style({ transform: 'scale(1)', offset: 1 })
+        ]))
+      ])
+    ])
+  ]
 })
-
 export class DefeatModalComponent implements OnInit {
   @Input() playerName = '';
   countdown = 3; // Countdown in seconds
@@ -49,9 +56,10 @@ export class DefeatModalComponent implements OnInit {
       }
     }, 100); // Check more frequently for smoother countdown
 
-    // Play victory sound
+    // Play defeat sound
     this.playDefeatSound();
   }
+
   ngOnDestroy(): void {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);

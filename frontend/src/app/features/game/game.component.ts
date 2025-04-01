@@ -18,8 +18,6 @@ import { FormsModule } from "@angular/forms";
 import { RoomService } from "../../core/services/room.service";
 import { VictoryModalComponent } from "./victory-modal/victory-modal.component";
 import { DefeatModalComponent } from "./defeat-modal/defeat-modal.component";
-import {CharacterService} from "../../core/services/character.service";
-import {environment} from "../../../environments/environment";
 
 @Component({
   selector: "app-game",
@@ -63,7 +61,6 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
   // New properties for victory/defeat modals
   showVictoryModal = false;
   showDefeatModal = false;
-  apiBaseUrl = environment.apiUrl;
 
   constructor(
     private route: ActivatedRoute,
@@ -71,8 +68,6 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
     private roomService: RoomService,
     private webSocketService: WebSocketService,
     private router: Router,
-    private characterService: CharacterService,
-
   ) {}
 
   ngOnInit() {
@@ -85,10 +80,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
       console.log("Player ID:", this.playerId)
       console.log("Room ID:", this.roomId)
 
-      this.getCharacterImage();
-
       // Get room information to find opponent
       this.getRoomInfo()
+
       this.webSocketService
         .connect(this.playerId, this.roomId)
         .then(() => {
@@ -164,7 +158,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
             error: (error) => console.error("Match updates subscription error:", error),
           })
 
-          })
+          // Load character info
+          this.setupCharacters()
+        })
         .catch((error) => {
           console.error("WebSocket connection error:", error)
         })
@@ -176,69 +172,99 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   // Update the claimVictory method
   async claimVictory() {
-    if (this.gameEnded || !this.opponentId) return
+    console.log("Claim victory method entered");
+
+    // Don't return immediately, log the condition first
+    if (this.gameEnded) {
+      console.log("Game already ended, not proceeding with victory claim");
+      return;
+    }
+
+    if (!this.opponentId) {
+      console.log("Missing opponent ID, trying to proceed anyway");
+      // Continue with the method instead of returning
+    }
+
+    // Set state variables first to ensure UI updates
+    this.gameEnded = true;
+    this.winner = this.playerName;
+    this.showVictoryModal = true;
+    console.log("Victory modal set to show:", this.showVictoryModal);
 
     try {
-      // First create game with current player as winner
-      const response = await this.webSocketService.completeGame(
-        this.roomId,
-        this.playerId!, // current player is winner
-        this.opponentId,
-      )
+      // If we have opponent ID, complete the game
+      if (this.opponentId) {
+        console.log(`Completing game with Room: ${this.roomId}, Winner: ${this.playerId}, Loser: ${this.opponentId}`);
 
-      this.gameId = response.id
-      this.gameEnded = true
-      this.winner = this.playerName
-      this.addSystemMessage(`You claimed victory! Game recorded.`)
+        const response = await this.webSocketService.completeGame(
+          this.roomId,
+          this.playerId!,
+          this.opponentId
+        );
 
-      // Notify opponent
-      await this.webSocketService.sendChatMessage(
-        `GAME_COMPLETED:${this.playerName}`,
-        "SYSTEM_MESSAGE",
-        this.playerId!,
-        this.roomId,
-      )
+        console.log("Game completion response:", response);
+        this.gameId = response?.id;
+        this.addSystemMessage(`Victory claimed! Game ID: ${this.gameId}`);
 
-      // Show victory modal
-      this.showVictoryModal = true
+        // Notify opponent
+        await this.webSocketService.sendChatMessage(
+          `VICTORY_CLAIMED:${this.playerName}:${this.opponentName}`,
+          "SYSTEM_MESSAGE",
+          this.playerId!,
+          this.roomId
+        );
+      }
     } catch (error) {
-      console.error("Failed to complete game:", error)
-      this.addSystemMessage("Failed to record game result. Please try again.")
+      console.error("Error completing game:", error);
+      // Even if the API call fails, keep showing the victory modal
     }
   }
-
   // Update the concedeDefeat method
+
   async concedeDefeat() {
-    if (this.gameEnded || !this.opponentId) return
+    console.log("Concede defeat method entered");
+
+    // Don't return immediately, log the condition first
+    if (this.gameEnded) {
+      console.log("Game already ended, not proceeding with defeat concession");
+      return;
+    }
+
+    // Set state variables first to ensure UI updates
+    this.gameEnded = true;
+    this.winner = this.opponentName;
+    this.showDefeatModal = true;
+    console.log("Defeat modal set to show:", this.showDefeatModal);
 
     try {
-      // First create game with opponent as winner
-      const response = await this.webSocketService.completeGame(
-        this.roomId,
-        this.opponentId, // opponent is winner
-        this.playerId!, // current player is loser
-      )
+      // If we have opponent ID, complete the game
+      if (this.opponentId) {
+        console.log(`Completing game with Room: ${this.roomId}, Winner: ${this.opponentId}, Loser: ${this.playerId}`);
 
-      this.gameId = response.id
-      this.gameEnded = true
-      this.winner = this.opponentName
-      this.addSystemMessage(`You conceded defeat. ${this.opponentName} wins!`)
+        const response = await this.webSocketService.completeGame(
+          this.roomId,
+          this.opponentId,
+          this.playerId!
+        );
 
-      // Notify opponent
-      await this.webSocketService.sendChatMessage(
-        `GAME_COMPLETED:${this.opponentName}`,
-        "SYSTEM_MESSAGE",
-        this.playerId!,
-        this.roomId,
-      )
+        console.log("Game completion response:", response);
+        this.gameId = response?.id;
+        this.addSystemMessage(`Defeat conceded! Game ID: ${this.gameId}`);
 
-      // Show defeat modal
-      this.showDefeatModal = true
+        // Notify opponent
+        await this.webSocketService.sendChatMessage(
+          `DEFEAT_CONCEDED:${this.playerName}:${this.opponentName}`,
+          "SYSTEM_MESSAGE",
+          this.playerId!,
+          this.roomId
+        );
+      }
     } catch (error) {
-      console.error("Failed to complete game:", error)
-      this.addSystemMessage("Failed to record game result. Please try again.")
+      console.error("Error completing game:", error);
+      // Even if the API call fails, keep showing the defeat modal
     }
   }
+
 
   // Keep all other existing methods
   getRoomInfo() {
@@ -395,44 +421,19 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.scrollToBottom("free")
   }
 
-  getCharacterImage(): void {
-    const storageKey = `character_${this.roomId}_${this.playerId}`;
-    const characterId = localStorage.getItem(storageKey);
-
-    if (characterId) {
-      this.characterService.getCharacterById(Number(characterId)).subscribe({
-        next: (character) => {
-          this.myCharacter = character;
-          if (character.picUrl) {
-            // Process the URL and update character object
-            this.myCharacter.imageUrl = this.getImageUrl(character.picUrl);
-            console.log("Character image URL:", this.myCharacter.imageUrl);
-          }
-        },
-        error: (err) => {
-          console.error("Failed to fetch character:", err);
-        }
-      });
-    }
-  }
-
-  // Helper method to get full image URL
-  getImageUrl(path: string): string {
-    if (!path) return '';
-
-    // Strip the API base URL if present to get just the asset path
-    if (path.includes(this.apiBaseUrl)) {
-      path = path.replace(this.apiBaseUrl, '');
+  setupCharacters() {
+    // For now using placeholder data
+    // In a real implementation, you would fetch this from a service
+    this.myCharacter = {
+      name: this.playerName + "'s Character",
+      // Add other character properties as needed
     }
 
-    // Handle paths that contain /assets/
-    if (path.includes('/assets/')) {
-      // Remove leading slash to use as relative path
-      return path.startsWith('/') ? path.substring(1) : path;
+    this.opponentCharacter = {
+      name: "Mystery Character",
+      // Add other character properties as needed
     }
 
-    // For other cases (full URLs not matching our API)
-    return path;
+    console.log("Characters initialized:", this.myCharacter, this.opponentCharacter)
   }
 }
-
