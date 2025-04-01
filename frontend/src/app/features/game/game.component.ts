@@ -85,9 +85,10 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
       console.log("Player ID:", this.playerId)
       console.log("Room ID:", this.roomId)
 
+      this.getCharacterImage();
+
       // Get room information to find opponent
       this.getRoomInfo()
-
       this.webSocketService
         .connect(this.playerId, this.roomId)
         .then(() => {
@@ -394,8 +395,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.scrollToBottom("free")
   }
 
-
-  getCharacterImage(): string {
+  getCharacterImage(): void {
     const storageKey = `character_${this.roomId}_${this.playerId}`;
     const characterId = localStorage.getItem(storageKey);
 
@@ -404,19 +404,16 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
         next: (character) => {
           this.myCharacter = character;
           if (character.picUrl) {
-            return this.getImageUrl(character.picUrl);
+            // Process the URL and update character object
+            this.myCharacter.imageUrl = this.getImageUrl(character.picUrl);
+            console.log("Character image URL:", this.myCharacter.imageUrl);
           }
-          return "";
         },
         error: (err) => {
           console.error("Failed to fetch character:", err);
-          return "";
         }
       });
-    } else {
-      return "";
     }
-    return "";
   }
 
   // Helper method to get full image URL
