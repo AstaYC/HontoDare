@@ -1,70 +1,65 @@
-import { Component } from '@angular/core';
-import {Router, RouterLink} from "@angular/router";
-import { AuthService} from "../../../core/services/auth.service";
-import {error} from "@angular/compiler-cli/src/transformers/util";
-import {FormsModule} from "@angular/forms";
-import {HttpClientModule} from "@angular/common/http";
-import {NgIf} from "@angular/common";
-import {TokenService} from "../../../core/services/token.service";
-
+import { Component } from "@angular/core"
+import {  Router, RouterLink } from "@angular/router"
+import  { AuthService } from "../../../core/services/auth.service"
+import { FormsModule } from "@angular/forms"
+import { HttpClientModule } from "@angular/common/http"
+import { NgIf } from "@angular/common"
+import  { TokenService } from "../../../core/services/token.service"
 
 @Component({
-  selector: 'app-login',
+  selector: "app-login",
   standalone: true,
-  imports: [
-    RouterLink,
-    FormsModule,
-    HttpClientModule,
-    NgIf
-  ],
-  templateUrl: './login.component.html',
+  imports: [RouterLink, FormsModule, HttpClientModule, NgIf],
+  templateUrl: "./login.component.html",
+  styleUrls: ["./login.component.css"],
 })
-
 export class LoginComponent {
-  email: string = '';
-  password: string = '';
-  errorMessage: string = '';
-  successMessage: string = '';
+  email = ""
+  password = ""
+  errorMessage = ""
+  successMessage = ""
 
-  constructor(private authService: AuthService,
-              private router: Router,
-              private tokenService: TokenService,
-
-  ) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private tokenService: TokenService,
+  ) {}
 
   login() {
-    if(!this.email || !this.password){
-      this.errorMessage = 'All fields are required';
-      this.successMessage = '';
-      return;
+    // Clear previous messages
+    this.errorMessage = ""
+    this.successMessage = ""
+
+    if (!this.email || !this.password) {
+      this.errorMessage = "All fields are required"
+      return
     }
 
     this.authService.login(this.email, this.password).subscribe({
       next: (response) => {
-        if(response){
-          this.successMessage = 'Login successful';
-          this.errorMessage = '';
+        if (response) {
+          this.successMessage = "Login successful"
+          this.tokenService.saveToken(response)
 
-          this.tokenService.saveToken(response);
-
-          if(this.tokenService.getUserRole() == 'ADMIN'){
-            this.router.navigate(['/admin/rooms']);
-          }else if (this.tokenService.getUserRole() === 'EMPLOYEE'){
-            this.router.navigate(['/employee/dashboard']);
-          } else{
-            this.router.navigate(['/rooms']);
-          }
+          // Redirect based on user role
+          setTimeout(() => {
+            if (this.tokenService.getUserRole() == "ADMIN") {
+              this.router.navigate(["/admin/users"])
+            } else if (this.tokenService.getUserRole() === "MODERATOR") {
+              this.router.navigate(["/home"])
+            } else {
+              this.router.navigate(["/home"])
+            }
+          }, 1000) // Short delay to show success message
         } else {
-          this.errorMessage = 'Login failed. Please check your credentials';
-          this.successMessage = '';
+          this.errorMessage = "Login failed. Please check your credentials"
         }
       },
       error: (error) => {
-        this.errorMessage = error.error?.message || 'login failed. Pleas check your credentials';
-        this.successMessage = '';
-        console.error('Login failed',error);
-
-      }
-    });
+        this.errorMessage = error.error?.message || "Login failed. Please check your credentials"
+        console.error("Login failed", error)
+      },
+    })
   }
 }
+

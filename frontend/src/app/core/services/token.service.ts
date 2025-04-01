@@ -67,4 +67,22 @@ export class TokenService {
   clearToken(): void {
     this.removeToken();
   }
+
+  getUsername(): string | null {
+    const token = this.getToken();
+    if (token) {
+      const decodedToken = this.getDecodedToken(token);
+      return decodedToken?.username || null;
+    }
+    return null;
+  }
+
+  getName(): string | null {
+    const token = this.getToken();
+    if (token) {
+      const decodedToken = this.getDecodedToken(token);
+      return decodedToken?.name || null;
+    }
+    return null;
+  }
 }

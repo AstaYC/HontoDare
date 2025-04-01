@@ -160,6 +160,41 @@
   width: 100%;
 }
 
+/* Add these styles for the Luffy image */
+.luffy-container {
+  position: absolute;
+  top: -180px; /* Adjust this value to position Luffy correctly */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px; /* Adjust based on your image size */
+  height: 200px; /* Adjust based on your image size */
+  z-index: 20;
+  pointer-events: none; /* So it doesn't interfere with form interaction */
+}
+
+.luffy-image {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+  animation: luffy-bounce 4s ease-in-out infinite;
+}
+
+@keyframes luffy-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Adjust the login container to accommodate Luffy */
+.w-full.max-w-md.relative.z-10 {
+  margin-top: 100px; /* Add space at the top for Luffy */
+  position: relative;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .login-container {

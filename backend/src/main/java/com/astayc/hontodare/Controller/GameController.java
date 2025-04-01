@@ -48,7 +48,7 @@ public class GameController {
                     gameDTO.getRoomId(),
                     gameDTO.getPlayer1Id(),
                     gameDTO.getPlayer2Id()
-            );
+            );   
 
             if (existingGame.isPresent()) {
                 // Update existing game with character2

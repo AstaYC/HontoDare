@@ -34,6 +34,17 @@ export class AuthService {
             localStorage.setItem('role', userRole);
           }
 
+          // Store username in localStorage
+          const userData = this.tokenService.getDecodedToken(response);
+          if (userData) {
+            if (userData.username) {
+              localStorage.setItem('username', userData.username);
+            }
+            if (userData.name) {
+              localStorage.setItem('name', userData.name);
+            }
+          }
+
           this.isAuthenticatedSubject.next(true);
         }
       }),
@@ -45,17 +56,23 @@ export class AuthService {
     );
   }
 
-  register(username: string, password: string): Observable<any> {
+  register(name: string , username: string, email: string, password: string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const body = { username, password };
-    return this.http.post(`${this.apiUrl}/api/auth/register`, body, { headers, responseType: 'json' }).pipe(
+    const body = { name, username, email, password };
+    return this.http.post(`${this.apiUrl}/api/users/register`, body, { headers,responseType: 'text'})
+      .pipe(
+      tap((response) => {
+        if (response) {
+          // localStorage.setItem('username', username);
+          // localStorage.setItem('name', name);
+        }
+      }),
       catchError(error => {
         console.error('Registration failed', error);
-        return of(null);
+        return throwError(() => error);
       })
     );
   }
-
   refreshToken(refreshToken: string): Observable<any> {
     return this.http.post<{ accessToken: string }>(`${this.apiUrl}/api/auth/refresh`, { refreshToken }).pipe(
       map(response => response.accessToken),
@@ -116,5 +133,14 @@ export class AuthService {
   updateUserProfile(userId: number, userData: FormData): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/${userId}`, userData);
   }
+
+  getUserName(): string | null {
+    return localStorage.getItem('username') || this.tokenService.getUsername();
+  }
+
+  getFullName(): string | null {
+    return localStorage.getItem('name') || this.tokenService.getName();
+  }
+
 
 }

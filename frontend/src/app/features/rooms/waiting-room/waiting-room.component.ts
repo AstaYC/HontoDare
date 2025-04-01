@@ -133,4 +133,21 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     }
     this.webSocketService.disconnect();
   }
+
+  getPlayerDisplayName(player: any): string {
+    // If this is the current user, use the localStorage username
+    const currentUserId = this.authService.getCurrentUserId();
+    if (player.userId === currentUserId) {
+      return localStorage.getItem('username') || localStorage.getItem('name') ||
+        player.username || player.name || `Player ${player.userId}`;
+    }
+
+    // For other players
+    return player.username || player.name || `Player ${player.userId}`;
+  }
+
+  getPlayerInitial(player: any): string {
+    const displayName = this.getPlayerDisplayName(player);
+    return displayName.charAt(0).toUpperCase();
+  }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from "@angular/router"
 import { CommonModule } from "@angular/common"
 import {AuthService} from "../../core/services/auth.service";
@@ -14,8 +14,9 @@ import {AuthService} from "../../core/services/auth.service";
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit{
   isMenuOpen = false
+  isAdmin = false
 
   constructor(private authService: AuthService) {}
 
@@ -33,4 +34,21 @@ export class NavbarComponent {
       howToPlaySection.scrollIntoView({ behavior: "smooth" })
     }
   }
+
+  ngOnInit() {
+    this.checkAdmin();
+  }
+
+  checkAdmin(){
+    const role = localStorage.getItem("role");
+    if (role === "ADMIN"){
+      try{
+      this.isAdmin = true;
+      } catch(e){
+        this.isAdmin = false
+      }
+    }
+  }
+
 }
+

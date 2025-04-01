@@ -19,10 +19,11 @@ import {RoomFormComponent} from "./features/admin/rooms/room-form/room-form.comp
 import {RoomAdminListComponent} from "./features/admin/rooms/room-list/room-list.component";
 import {CharacterFormComponent} from "./features/admin/characters/character-form/character-form.component";
 import {CharacterListComponent} from "./features/admin/characters/character-list/character-list.component";
+import {RegisterComponent} from "./features/auth/register/register.component";
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: 'register', component: LoginComponent }, // Ensure register route is correctly set
+  { path: 'register', component: RegisterComponent }, // Ensure register route is correctly set
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'rooms', component: RoomListComponent, canActivate: [AuthGuard] },
   { path: 'waiting-room/:id', component: WaitingRoomComponent, canActivate: [AuthGuard] },

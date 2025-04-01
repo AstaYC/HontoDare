@@ -18,6 +18,8 @@ import { FormsModule } from "@angular/forms";
 import { RoomService } from "../../core/services/room.service";
 import { VictoryModalComponent } from "./victory-modal/victory-modal.component";
 import { DefeatModalComponent } from "./defeat-modal/defeat-modal.component";
+import {CharacterService} from "../../core/services/character.service";
+import {environment} from "../../../environments/environment";
 
 @Component({
   selector: "app-game",
@@ -61,6 +63,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
   // New properties for victory/defeat modals
   showVictoryModal = false;
   showDefeatModal = false;
+  apiBaseUrl = environment.apiUrl;
 
   constructor(
     private route: ActivatedRoute,
@@ -68,6 +71,8 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
     private roomService: RoomService,
     private webSocketService: WebSocketService,
     private router: Router,
+    private characterService: CharacterService,
+
   ) {}
 
   ngOnInit() {
@@ -158,9 +163,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
             error: (error) => console.error("Match updates subscription error:", error),
           })
 
-          // Load character info
-          this.setupCharacters()
-        })
+          })
         .catch((error) => {
           console.error("WebSocket connection error:", error)
         })
@@ -391,20 +394,48 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.scrollToBottom("free")
   }
 
-  setupCharacters() {
-    // For now using placeholder data
-    // In a real implementation, you would fetch this from a service
-    this.myCharacter = {
-      name: this.playerName + "'s Character",
-      // Add other character properties as needed
+
+  getCharacterImage(): string {
+    const storageKey = `character_${this.roomId}_${this.playerId}`;
+    const characterId = localStorage.getItem(storageKey);
+
+    if (characterId) {
+      this.characterService.getCharacterById(Number(characterId)).subscribe({
+        next: (character) => {
+          this.myCharacter = character;
+          if (character.picUrl) {
+            return this.getImageUrl(character.picUrl);
+          }
+          return "";
+        },
+        error: (err) => {
+          console.error("Failed to fetch character:", err);
+          return "";
+        }
+      });
+    } else {
+      return "";
+    }
+    return "";
+  }
+
+  // Helper method to get full image URL
+  getImageUrl(path: string): string {
+    if (!path) return '';
+
+    // Strip the API base URL if present to get just the asset path
+    if (path.includes(this.apiBaseUrl)) {
+      path = path.replace(this.apiBaseUrl, '');
     }
 
-    this.opponentCharacter = {
-      name: "Mystery Character",
-      // Add other character properties as needed
+    // Handle paths that contain /assets/
+    if (path.includes('/assets/')) {
+      // Remove leading slash to use as relative path
+      return path.startsWith('/') ? path.substring(1) : path;
     }
 
-    console.log("Characters initialized:", this.myCharacter, this.opponentCharacter)
+    // For other cases (full URLs not matching our API)
+    return path;
   }
 }
 

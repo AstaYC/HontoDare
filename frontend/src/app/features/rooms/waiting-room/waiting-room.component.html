@@ -47,11 +47,11 @@
           <div *ngFor="let player of players; let i = index"
                class="bg-gray-800 border border-red-700 p-4 flex items-center">
             <div class="w-12 h-12 bg-gradient-to-br from-red-800 to-red-600 rounded-full flex items-center justify-center mr-4 text-white font-bold">
-              {{player.username?.charAt(0) || player.name?.charAt(0) || 'P'}}
+              {{getPlayerInitial(player)}}
             </div>
             <div>
               <p class="font-samurai text-white">
-                {{ player.username || player.name || 'Player ' + player.userId }}
+                {{getPlayerDisplayName(player)}}
               </p>
               <p class="text-gray-500 text-xs">
                 <i class="fas fa-circle text-green-500 mr-1"></i> READY

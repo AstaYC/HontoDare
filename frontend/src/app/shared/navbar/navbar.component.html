@@ -23,6 +23,10 @@
             <a (click)="scrollToHowToPlay()"
                class="font-samurai text-white hover:text-red-500 transition-colors cursor-pointer">How to Play</a>
           </li>
+          <li *ngIf="isAdmin">
+            <a routerLink="/admin/users" routerLinkActive="text-red-500"
+               class="font-samurai text-white hover:text-red-500 transition-colors">Dashboard</a>
+          </li>
         </ul>
       </nav>
 

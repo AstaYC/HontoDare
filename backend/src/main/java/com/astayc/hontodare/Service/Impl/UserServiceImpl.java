@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // Generate and return JWT token
-        return jwtUtil.generateToken(user.getId(), user.getRole().toString());
+        return jwtUtil.generateToken( user.getId(), user.getUsername() , user.getName() , user.getRole().toString());
     }
 
     @Override

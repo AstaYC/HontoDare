@@ -13,10 +13,12 @@ public class JwtUtil {
     private final String SECRET_KEY = "averylongandsecuresecretkey12345averylongandsecuresecretkey12345";
     private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 hours
 
-    public String generateToken(Long userId, String role) {
+    public String generateToken(Long userId, String username , String name ,  String role) {
         try {
             return Jwts.builder()
                     .claim("userId", userId)
+                    .claim("username", username)
+                    .claim("name", name)
                     .claim("role", role)
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
@@ -51,5 +53,13 @@ public class JwtUtil {
     public String getRole(String token) {
         Claims claims = extractClaims(token);
         return claims.get("role", String.class);
+    }
+
+    public String getUsername(String token) {
+        return extractClaims(token).get("username", String.class);
+    }
+
+    public String getName(String token) {
+        return extractClaims(token).get("name", String.class);
     }
 }

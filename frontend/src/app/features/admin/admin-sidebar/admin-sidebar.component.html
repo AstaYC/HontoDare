@@ -1,154 +1,156 @@
-<div class="h-screen flex flex-col bg-black border-r border-gray-800 text-white" [ngClass]="{'w-64': isSidebarOpen, 'w-16': !isSidebarOpen}">
-    <!-- Sidebar Header -->
-    <div class="p-4 border-b border-gray-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2" *ngIf="isSidebarOpen">
-            <img src="assets/img/HontoDare.png" alt="HontoDare Logo" class="h-8 w-auto" />
-            <div>
-                <h1 class="font-kill-the-noise text-red-600 text-lg transform -skew-x-12">
-                    HontoDare
-                </h1>
-                <div class="h-1 w-12 bg-red-600 transform -skew-x-12"></div>
-            </div>
-        </div>
-        <button class="text-gray-400 hover:text-white" (click)="toggleSidebar()">
-            <i class="fas" [ngClass]="isSidebarOpen ? 'fa-chevron-left' : 'fa-chevron-right'"></i>
-        </button>
+<div class="h-screen flex flex-col bg-black border-r border-red-800 text-white sidebar-container" [ngClass]="{'w-64': isSidebarOpen, 'w-16': !isSidebarOpen}">
+  <!-- Sidebar Header -->
+  <div class="p-4 border-b border-red-800 flex items-center justify-between sidebar-header">
+    <div class="flex items-center space-x-2" *ngIf="isSidebarOpen">
+      <div class="logo-container">
+        <img src="assets/img/HontoDare.png" alt="HontoDare Logo" class="h-8 w-auto logo-image" />
+      </div>
+      <div>
+        <h1 class="font-kill-the-noise text-red-600 text-lg transform -skew-x-12 logo-text">
+          HontoDare
+        </h1>
+        <div class="h-1 w-12 bg-red-600 transform -skew-x-12 logo-underline"></div>
+      </div>
     </div>
+    <button class="text-gray-400 hover:text-white toggle-btn" (click)="toggleSidebar()">
+      <i class="fas" [ngClass]="isSidebarOpen ? 'fa-chevron-left' : 'fa-chevron-right'"></i>
+    </button>
+  </div>
 
-    <!-- Admin Info -->
-    <div class="p-4 bg-gray-900/50 mx-2 my-4 border border-gray-800" *ngIf="isSidebarOpen">
-        <div class="flex items-center space-x-3 mb-3">
-            <div class="h-10 w-10 border-2 border-red-600 rounded-full overflow-hidden">
-                <img src="assets/img/admin-avatar.jpg" alt="Admin" class="h-full w-full object-cover" />
-            </div>
-            <div>
-                <h3 class="font-kill-the-noise text-white">ADMIN</h3>
-                <p class="text-xs text-gray-400 font-samurai">System Administrator</p>
-            </div>
-        </div>
+  <!-- Admin Info -->
+  <div class="p-4 bg-gray-900/50 mx-2 my-4 border border-red-800 admin-info" *ngIf="isSidebarOpen">
+    <div class="flex items-center space-x-3 mb-3">
+      <div class="h-10 w-10 border-2 border-red-600 rounded-full overflow-hidden admin-avatar">
+        <img src="assets/img/admin-avatar.jpg" alt="Admin" class="h-full w-full object-cover" />
+      </div>
+      <div>
+        <h3 class="font-kill-the-noise text-white">ADMIN</h3>
+        <p class="text-xs text-gray-400 font-samurai">System Administrator</p>
+      </div>
     </div>
+  </div>
 
-    <!-- Navigation -->
-    <div class="flex-1 overflow-y-auto">
-        <div class="px-2 py-4">
-            <!-- Main Menu -->
-            <div class="mb-6">
-                <h2 class="font-kill-the-noise text-red-500 transform -skew-x-12 px-4 mb-2" *ngIf="isSidebarOpen">
-                    MAIN MENU
-                </h2>
-                <ul class="space-y-1">
-                    <li>
-                        <a
-                                routerLink="/admin/dashboard"
-                                routerLinkActive="bg-gray-800 text-white"
-                                class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md"
-                        >
-                            <i class="fas fa-tachometer-alt w-5"></i>
-                            <span class="ml-3" *ngIf="isSidebarOpen">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                                routerLink="/admin/users"
-                                routerLinkActive="bg-gray-800 text-white"
-                                class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md"
-                        >
-                            <i class="fas fa-users w-5"></i>
-                            <span class="ml-3" *ngIf="isSidebarOpen">User Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                                routerLink="/admin/rooms"
-                                routerLinkActive="bg-gray-800 text-white"
-                                class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md"
-                        >
-                            <i class="fas fa-door-open w-5"></i>
-                            <span class="ml-3" *ngIf="isSidebarOpen">Game Rooms</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                                routerLink="/admin/tournaments"
-                                routerLinkActive="bg-gray-800 text-white"
-                                class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md"
-                        >
-                            <i class="fas fa-trophy w-5"></i>
-                            <span class="ml-3" *ngIf="isSidebarOpen">Tournaments</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+  <!-- Navigation -->
+  <div class="flex-1 overflow-y-auto sidebar-nav">
+    <div class="px-2 py-4">
+      <!-- Main Menu -->
+      <div class="mb-6 nav-section">
+        <h2 class="font-kill-the-noise text-red-500 transform -skew-x-12 px-4 mb-2 section-title" *ngIf="isSidebarOpen">
+          MAIN MENU
+        </h2>
+        <ul class="space-y-1">
+          <li>
+            <a
+              routerLink="/home"
+              routerLinkActive="bg-gray-800 text-white active-link"
+              class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md nav-link"
+            >
+              <i class="fas fa-home w-5 nav-icon"></i>
+              <span class="ml-3 nav-text" *ngIf="isSidebarOpen">Home</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/admin/users"
+              routerLinkActive="bg-gray-800 text-white active-link"
+              class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md nav-link"
+            >
+              <i class="fas fa-users w-5 nav-icon"></i>
+              <span class="ml-3 nav-text" *ngIf="isSidebarOpen">User Management</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/admin/rooms"
+              routerLinkActive="bg-gray-800 text-white active-link"
+              class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md nav-link"
+            >
+              <i class="fas fa-door-open w-5 nav-icon"></i>
+              <span class="ml-3 nav-text" *ngIf="isSidebarOpen">Game Rooms</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/admin/tournaments"
+              routerLinkActive="bg-gray-800 text-white active-link"
+              class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md nav-link"
+            >
+              <i class="fas fa-trophy w-5 nav-icon"></i>
+              <span class="ml-3 nav-text" *ngIf="isSidebarOpen">Tournaments</span>
+            </a>
+          </li>
+        </ul>
+      </div>
 
-            <!-- Game Content -->
-            <div class="mb-6">
-                <h2 class="font-kill-the-noise text-red-500 transform -skew-x-12 px-4 mb-2" *ngIf="isSidebarOpen">
-                    GAME CONTENT
-                </h2>
-                <ul class="space-y-1">
-                    <li>
-                        <a
-                                routerLink="/admin/categories"
-                                routerLinkActive="bg-gray-800 text-white"
-                                class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md"
-                        >
-                            <i class="fas fa-tags w-5"></i>
-                            <span class="ml-3" *ngIf="isSidebarOpen">Categories</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                                routerLink="/admin/characters"
-                                routerLinkActive="bg-gray-800 text-white"
-                                class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md"
-                        >
-                            <i class="fas fa-user-astronaut w-5"></i>
-                            <span class="ml-3" *ngIf="isSidebarOpen">Characters</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+      <!-- Game Content -->
+      <div class="mb-6 nav-section">
+        <h2 class="font-kill-the-noise text-red-500 transform -skew-x-12 px-4 mb-2 section-title" *ngIf="isSidebarOpen">
+          GAME CONTENT
+        </h2>
+        <ul class="space-y-1">
+          <li>
+            <a
+              routerLink="/admin/categories"
+              routerLinkActive="bg-gray-800 text-white active-link"
+              class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md nav-link"
+            >
+              <i class="fas fa-tags w-5 nav-icon"></i>
+              <span class="ml-3 nav-text" *ngIf="isSidebarOpen">Categories</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/admin/characters"
+              routerLinkActive="bg-gray-800 text-white active-link"
+              class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md nav-link"
+            >
+              <i class="fas fa-user-astronaut w-5 nav-icon"></i>
+              <span class="ml-3 nav-text" *ngIf="isSidebarOpen">Characters</span>
+            </a>
+          </li>
+        </ul>
+      </div>
 
-            <!-- System -->
-            <div>
-                <h2 class="font-kill-the-noise text-red-500 transform -skew-x-12 px-4 mb-2" *ngIf="isSidebarOpen">
-                    SYSTEM
-                </h2>
-                <ul class="space-y-1">
-                    <li>
-                        <a
-                                routerLink="/admin/settings"
-                                routerLinkActive="bg-gray-800 text-white"
-                                class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md"
-                        >
-                            <i class="fas fa-cog w-5"></i>
-                            <span class="ml-3" *ngIf="isSidebarOpen">Settings</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                                routerLink="/admin/logs"
-                                routerLinkActive="bg-gray-800 text-white"
-                                class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md"
-                        >
-                            <i class="fas fa-list w-5"></i>
-                            <span class="ml-3" *ngIf="isSidebarOpen">Logs</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+      <!-- System -->
+      <div class="nav-section">
+        <h2 class="font-kill-the-noise text-red-500 transform -skew-x-12 px-4 mb-2 section-title" *ngIf="isSidebarOpen">
+          SYSTEM
+        </h2>
+        <ul class="space-y-1">
+          <li>
+            <a
+              routerLink="/admin/settings"
+              routerLinkActive="bg-gray-800 text-white active-link"
+              class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md nav-link"
+            >
+              <i class="fas fa-cog w-5 nav-icon"></i>
+              <span class="ml-3 nav-text" *ngIf="isSidebarOpen">Settings</span>
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/admin/logs"
+              routerLinkActive="bg-gray-800 text-white active-link"
+              class="flex items-center px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md nav-link"
+            >
+              <i class="fas fa-list w-5 nav-icon"></i>
+              <span class="ml-3 nav-text" *ngIf="isSidebarOpen">Logs</span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </div>
 
-    <!-- Sidebar Footer -->
-    <div class="p-4 border-t border-gray-800">
-        <a
-                routerLink="/logout"
-                class="flex items-center px-4 py-2 text-gray-400 hover:text-red-500 hover:bg-gray-800 rounded-md"
-        >
-            <i class="fas fa-sign-out-alt w-5"></i>
-            <span class="ml-3" *ngIf="isSidebarOpen">Logout</span>
-        </a>
-    </div>
+  <!-- Sidebar Footer -->
+  <div class="p-4 border-t border-red-800 sidebar-footer">
+    <a
+      routerLink="/logout"
+      class="flex items-center px-4 py-2 text-gray-400 hover:text-red-500 hover:bg-gray-800 rounded-md logout-btn"
+    >
+      <i class="fas fa-sign-out-alt w-5 logout-icon"></i>
+      <span class="ml-3 logout-text" *ngIf="isSidebarOpen">Logout</span>
+    </a>
+  </div>
 </div>
 
