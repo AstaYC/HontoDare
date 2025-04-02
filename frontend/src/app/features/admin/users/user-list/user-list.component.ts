@@ -59,7 +59,6 @@ export class UserListComponent implements OnInit {
         }
     }
 
-  // In
   getImageUrl(path: string): string {
     if (!path) return '';
     if (path.startsWith('http')) return path;

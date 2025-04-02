@@ -52,7 +52,6 @@ export class RoomService {
   }
 
   updateRoomWithImage(id: number, formData: FormData): Observable<Room> {
-    // Fixed this URL to match the controller's expected endpoint
     return this.http.put<Room>(`${this.apiUrl}/api/rooms/${id}`, formData);
   }
 

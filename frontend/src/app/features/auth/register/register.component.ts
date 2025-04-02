@@ -32,7 +32,6 @@ export class RegisterComponent {
     this.errorMessage = "";
     this.successMessage = "";
 
-    // Validate form fields
     if (!this.name || !this.username || !this.email || !this.password || !this.confirmPassword) {
       this.errorMessage = "All fields are required";
       return;
@@ -44,18 +43,15 @@ export class RegisterComponent {
       return;
     }
 
-    // Call the auth service to register
     this.authService.register(this.name ,this.username, this.email, this.password).subscribe({
       next: (response) => {
         if (response) {
           this.successMessage = "Registration successful. Please login.";
 
-          // Store username in local storage
           localStorage.setItem('username', this.username);
           localStorage.setItem('name', this.name);
 
 
-          // Redirect to login page after short delay
           setTimeout(() => {
             this.router.navigate(["/login"]);
           }, 1500);

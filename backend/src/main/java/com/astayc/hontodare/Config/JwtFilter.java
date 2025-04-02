@@ -36,7 +36,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 Long userId = jwtUtil.getUserId(token);
                 String role = jwtUtil.getRole(token);
 
-                // Create authentication token
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))
                 );

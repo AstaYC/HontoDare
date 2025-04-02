@@ -1,4 +1,3 @@
-// src/test/java/com/astayc/hontodare/Service/UserServiceTest.java
 package com.astayc.hontodare.Service;
 
 import com.astayc.hontodare.DTO.Auth.LoginDTO;
@@ -75,20 +74,17 @@ class UserServiceTest {
         testUserDTO.setRole("USER");
         testUserDTO.setAvatarUrl("/assets/userPic/default.png");
 
-        // Configure ModelMapper behavior
         when(modelMapper.map(any(User.class), eq(UserDTO.class))).thenReturn(testUserDTO);
         when(modelMapper.map(any(UserDTO.class), eq(User.class))).thenReturn(testUser);
     }
 
     @Test
     void getUserDTOById_WithValidId_ShouldReturnUser() {
-        // Arrange
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
-        // Act
+
         UserDTO result = userService.getUserDTOById(1L);
 
-        // Assert
         assertNotNull(result);
         assertEquals("testuser", result.getUsername());
         verify(userRepository).findById(1L);
@@ -96,23 +92,18 @@ class UserServiceTest {
 
     @Test
     void getUserDTOById_WithInvalidId_ShouldThrowException() {
-        // Arrange
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(UsernameNotFoundException.class, () -> userService.getUserDTOById(99L));
         verify(userRepository).findById(99L);
     }
 
     @Test
     void getAllUsers_ShouldReturnAllUsers() {
-        // Arrange
         when(userRepository.findAll()).thenReturn(List.of(testUser));
 
-        // Act
         List<UserDTO> result = userService.getAllUsers();
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("testuser", result.get(0).getUsername());
@@ -120,38 +111,33 @@ class UserServiceTest {
 
     @Test
     void register_WithValidData_ShouldCreateUser() {
-        // Arrange
         RegisterDTO registerDTO = new RegisterDTO();
         registerDTO.setUsername("newuser");
         registerDTO.setEmail("new@example.com");
         registerDTO.setPassword("password");
         registerDTO.setName("New User");
 
-        User newUser = new User(); // Create a user object
+        User newUser = new User();
 
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
         when(modelMapper.map(any(RegisterDTO.class), eq(User.class))).thenReturn(newUser); // Mock this specifically
 
-        // Act
         userService.register(registerDTO);
 
-        // Assert
         verify(passwordEncoder).encode("password");
         verify(userRepository).save(any(User.class));
     }
 
     @Test
     void register_WithExistingUsername_ShouldThrowException() {
-        // Arrange
         RegisterDTO registerDTO = new RegisterDTO();
         registerDTO.setUsername("testuser");
         registerDTO.setEmail("new@example.com");
 
         when(userRepository.existsByUsername("testuser")).thenReturn(true);
 
-        // Act & Assert
         HontoDareException exception = assertThrows(HontoDareException.class,
                 () -> userService.register(registerDTO));
         assertEquals("Username is already taken!", exception.getMessage());
@@ -159,7 +145,6 @@ class UserServiceTest {
 
     @Test
     void login_WithValidCredentials_ShouldReturnToken() {
-        // Arrange
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setEmail("test@example.com");
         loginDTO.setPassword("password");
@@ -168,17 +153,14 @@ class UserServiceTest {
         when(passwordEncoder.matches("password", "hashedPassword")).thenReturn(true);
         when(jwtUtil.generateToken(eq(1L), eq("testuser"), eq("Test User"), eq("USER"))).thenReturn("test-jwt-token");
 
-        // Act
         String token = userService.login(loginDTO);
 
-        // Assert
         assertNotNull(token);
         assertEquals("test-jwt-token", token);
     }
 
     @Test
     void updateUser_WithValidData_ShouldReturnUpdatedUser() {
-        // Arrange
         UserDTO updateDTO = new UserDTO();
         updateDTO.setUsername("updateduser");
         updateDTO.setEmail("updated@example.com");
@@ -188,10 +170,8 @@ class UserServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        // Act
         UserDTO result = userService.updateUser(1L, updateDTO);
 
-        // Assert
         assertNotNull(result);
         verify(userRepository).findById(1L);
         verify(userRepository).save(any(User.class));
@@ -199,22 +179,17 @@ class UserServiceTest {
 
     @Test
     void deleteUser_WithValidId_ShouldDeleteUser() {
-        // Arrange
         when(userRepository.existsById(1L)).thenReturn(true);
 
-        // Act
         userService.deleteUser(1L);
 
-        // Assert
         verify(userRepository).deleteById(1L);
     }
 
     @Test
     void deleteUser_WithInvalidId_ShouldThrowException() {
-        // Arrange
         when(userRepository.existsById(99L)).thenReturn(false);
 
-        // Act & Assert
         assertThrows(UsernameNotFoundException.class, () -> userService.deleteUser(99L));
     }
 }

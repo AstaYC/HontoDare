@@ -90,7 +90,6 @@ export class ProfileComponent implements OnInit {
     const userId = this.authService.getCurrentUserId()
     if (!userId) return
 
-    // Check if password and confirmPassword match
     const password = this.profileForm.get("password")?.value
     const confirmPassword = this.profileForm.get("confirmPassword")?.value
 
@@ -99,7 +98,6 @@ export class ProfileComponent implements OnInit {
       return
     }
 
-    // Create user data object similar to admin form
     const userData: any = {
       id: userId,
       username: this.profileForm.get("username")?.value,
@@ -109,12 +107,10 @@ export class ProfileComponent implements OnInit {
       role: this.user?.role,
     }
 
-    // Only add password if provided and not empty
     if (password && password.trim() !== "") {
       userData.password = password
     }
 
-    // If there's a file, handle it separately
     if (this.selectedFile) {
       const formData = new FormData()
       formData.append("avatar", this.selectedFile)
@@ -138,7 +134,6 @@ export class ProfileComponent implements OnInit {
           },
         })
     } else {
-      // If no file, just update the user data directly like the admin form does
       this.loading = true
       this.profileService
         .updateUserData(userId, userData)

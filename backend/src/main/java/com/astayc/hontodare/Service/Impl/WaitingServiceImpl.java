@@ -35,27 +35,22 @@ public class WaitingServiceImpl implements WaitingService {
 
     @Override
     public void joinRoom(Long roomId, Long userId) {
-        // Check if the user is already in the room
         if (waitingRepository.existsByRoomIdAndUserId(roomId, userId)) {
             log.info("User {} is already in room {}", userId, roomId);
-            return; // User is already in the room, do nothing
+            return;
         }
 
         List<Waiting> userWaitings = waitingRepository.findByUserId(userId);
         if (!userWaitings.isEmpty()) {
             log.info("User {} is already in another room", userId);
-            // Either return or remove from previous rooms first
             userWaitings.forEach(w -> waitingRepository.deleteById(w.getId()));
         }
 
-        // User is not in the room, add them
         Waiting waiting = new Waiting(roomId, userId);
         waitingRepository.save(waiting);
 
-        // Check if two players are in the room
         List<Waiting> waitings = waitingRepository.findByRoomId(roomId);
         if (waitings.size() >= 2) {
-            // Notify players that they are matched
             ChatMessage matchMessage = ChatMessage.builder()
                     .roomId(roomId)
                     .players(waitings.stream().map(Waiting::getUserId).collect(Collectors.toList()))
@@ -71,7 +66,6 @@ public class WaitingServiceImpl implements WaitingService {
     public void leaveRoom(Long roomId, Long userId) {
         waitingRepository.deleteByRoomIdAndUserId(roomId, userId);
 
-        // Check if there are still players in the room
         List<Waiting> waitings = waitingRepository.findByRoomId(roomId);
         if (waitings.isEmpty()) {
             // Notify that the room is empty

@@ -20,10 +20,11 @@ import {RoomAdminListComponent} from "./features/admin/rooms/room-list/room-list
 import {CharacterFormComponent} from "./features/admin/characters/character-form/character-form.component";
 import {CharacterListComponent} from "./features/admin/characters/character-list/character-list.component";
 import {RegisterComponent} from "./features/auth/register/register.component";
+import {AdminGuard} from "./core/guards/admin.guard";
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent }, // Ensure register route is correctly set
+  { path: 'register', component: RegisterComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'rooms', component: RoomListComponent, canActivate: [AuthGuard] },
   { path: 'waiting-room/:id', component: WaitingRoomComponent, canActivate: [AuthGuard] },
@@ -37,41 +38,50 @@ export const routes: Routes = [
   },
   {
     path: 'admin/users',
-    component: UserListComponent
+    component: UserListComponent,
+    canActivate: [AdminGuard]
   },
   {
     path: 'admin/users/create',
-    component: UserFormComponent
+    component: UserFormComponent,
+    canActivate: [AdminGuard]
   },
   {
     path: 'admin/users/edit/:id',
-    component: UserFormComponent
+    component: UserFormComponent,
+    canActivate: [AdminGuard]
   },
 
   {
     path: 'admin/rooms',
-    component: RoomAdminListComponent
+    component: RoomAdminListComponent,
+    canActivate: [AdminGuard]
   },
   {
     path: 'admin/rooms/create',
-    component: RoomFormComponent
+    component: RoomFormComponent,
+    canActivate: [AdminGuard]
   },
   {
     path: 'admin/rooms/edit/:id',
-    component: RoomFormComponent
+    component: RoomFormComponent,
+    canActivate: [AdminGuard]
   } ,
 
   {
     path: 'admin/characters',
-    component: CharacterListComponent
+    component: CharacterListComponent,
+    canActivate: [AdminGuard]
   },
   {
     path: 'admin/characters/create',
-    component: CharacterFormComponent
+    component: CharacterFormComponent,
+    canActivate: [AdminGuard]
   },
   {
     path: 'admin/characters/edit/:id',
-    component: CharacterFormComponent
+    component: CharacterFormComponent,
+    canActivate: [AdminGuard]
   } ,
 
   {

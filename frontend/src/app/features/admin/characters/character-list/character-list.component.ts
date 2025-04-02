@@ -220,7 +220,6 @@ export class CharacterListComponent implements OnInit {
     }
   }
 
-  // Helper method to get full image URL
   getImageUrl(path: string): string {
     if (!path) return '';
 

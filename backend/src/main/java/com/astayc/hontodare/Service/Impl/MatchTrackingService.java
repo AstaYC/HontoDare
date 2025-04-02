@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class MatchTrackingService {
-    // Key: roomId, Value: Set of player IDs in current match
     private final Map<Long, Set<Long>> activeMatches = new ConcurrentHashMap<>();
 
     public boolean isCurrentMatch(Long roomId, Long player1, Long player2) {

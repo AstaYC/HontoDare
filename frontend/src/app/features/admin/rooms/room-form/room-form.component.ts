@@ -144,7 +144,7 @@ export class RoomFormComponent implements OnInit {
         error: (error) => {
           console.error('Error updating room:', error);
           this.loading = false;
-          alert('Failed to update the room. Please try again.'); // Add an alert to show error to user
+          alert('Failed to update the room. Please try again.');
         }
       });
     } else {
@@ -156,7 +156,7 @@ export class RoomFormComponent implements OnInit {
         error: (error) => {
           console.error('Error creating room:', error);
           this.loading = false;
-          alert('Failed to create the room. Please try again.'); // Add an alert to show error to user
+          alert('Failed to create the room. Please try again.');
         }
       });
     }

@@ -50,7 +50,6 @@ public class GameServiceImpl implements GameService {
     public GameDTO updateGame(GameDTO gameDTO) {
         Game existingGame = gameRepository.findById(gameDTO.getId()).orElseThrow();
 
-        // Only update specific fields instead of using modelMapper
         if (gameDTO.getEndTime() != null) {
             existingGame.setEndTime(gameDTO.getEndTime());
         }
@@ -60,9 +59,7 @@ public class GameServiceImpl implements GameService {
             winner.setId(gameDTO.getWinnerId());
             existingGame.setWinner(winner);
         }
-        // Handle character2Id update properly
         if (gameDTO.getCharacter2Id() != null) {
-            // Create Character entity with the ID if it doesn't exist
             if (existingGame.getCharacter2() == null) {
                 com.astayc.hontodare.Entity.Character character2 = new com.astayc.hontodare.Entity.Character();
                 character2.setId(gameDTO.getCharacter2Id());

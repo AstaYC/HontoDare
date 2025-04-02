@@ -1,4 +1,3 @@
-// src/app/core/models/character.model.ts
 export interface Character {
   id: number;
   name: string;

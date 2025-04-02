@@ -55,16 +55,13 @@ public class UserServiceImpl implements UserService {
         String email = loginDTO.getEmail();
         String password = loginDTO.getPassword();
 
-        // Find and authenticate user
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new HontoDareException("Invalid email or password", HttpStatus.UNAUTHORIZED));
 
-        // Verify password
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new HontoDareException("Invalid email or password", HttpStatus.UNAUTHORIZED);
         }
 
-        // Generate and return JWT token
         return jwtUtil.generateToken( user.getId(), user.getUsername() , user.getName() , user.getRole().toString());
     }
 
@@ -89,20 +86,16 @@ public class UserServiceImpl implements UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 
-        // Check username and email uniqueness...
 
-        // Update fields
         existingUser.setUsername(userDTO.getUsername());
         existingUser.setEmail(userDTO.getEmail());
         existingUser.setName(userDTO.getName());
         existingUser.setPoints(userDTO.getPoints());
 
-        // Update avatar URL if provided
         if (userDTO.getAvatarUrl() != null) {
             existingUser.setAvatarUrl(userDTO.getAvatarUrl());
         }
 
-        // Admin can update roles
         if (userDTO.getRole() != null) {
             existingUser.setRole(Role.valueOf(userDTO.getRole()));
         }

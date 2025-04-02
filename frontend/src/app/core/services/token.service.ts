@@ -59,7 +59,7 @@ export class TokenService {
     const token = this.getToken();
     if (token) {
       const decodedToken = this.getDecodedToken(token);
-      return decodedToken?.userId || null; // Corrected to "userId" instead of "playerId"
+      return decodedToken?.userId || null;
     }
     return null;
   }

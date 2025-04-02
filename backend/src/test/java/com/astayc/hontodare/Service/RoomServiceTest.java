@@ -38,7 +38,6 @@ class RoomServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Create test room
         testRoom = Room.builder()
                 .id(1L)
                 .name("Test Room")
@@ -48,7 +47,6 @@ class RoomServiceTest {
                 .roomPicUrl("/assets/rooms/default.png")
                 .build();
 
-        // Create test room DTO
         testRoomDTO = new RoomDTO();
         testRoomDTO.setId(1L);
         testRoomDTO.setName("Test Room");
@@ -57,14 +55,12 @@ class RoomServiceTest {
         testRoomDTO.setMaxPlayers("10");
         testRoomDTO.setRoomPicUrl("/assets/rooms/default.png");
 
-        // Configure ModelMapper behavior
         when(modelMapper.map(any(Room.class), eq(RoomDTO.class))).thenReturn(testRoomDTO);
         when(modelMapper.map(any(RoomDTO.class), eq(Room.class))).thenReturn(testRoom);
     }
 
     @Test
     void getAllRooms_ShouldReturnAllRooms() {
-        // Arrange
         Room room2 = Room.builder()
                 .id(2L)
                 .name("Room 2")
@@ -80,10 +76,8 @@ class RoomServiceTest {
 
         when(modelMapper.map(room2, RoomDTO.class)).thenReturn(roomDTO2);
 
-        // Act
         List<RoomDTO> result = roomService.getAllRooms();
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("Test Room", result.get(0).getName());
@@ -92,7 +86,6 @@ class RoomServiceTest {
 
     @Test
     void createRoom_WithValidData_ShouldReturnRoom() {
-        // Arrange
         RoomDTO newRoomDTO = new RoomDTO();
         newRoomDTO.setName("New Room");
         newRoomDTO.setMaxPlayers("5");
@@ -111,10 +104,8 @@ class RoomServiceTest {
         when(roomRepository.save(any(Room.class))).thenReturn(newRoom);
         when(modelMapper.map(newRoom, RoomDTO.class)).thenReturn(newRoomDTO);
 
-        // Act
         RoomDTO result = roomService.createRoom(newRoomDTO);
 
-        // Assert
         assertNotNull(result);
         assertEquals("New Room", result.getName());
         verify(roomRepository).save(any(Room.class));
@@ -122,14 +113,11 @@ class RoomServiceTest {
 
     @Test
     void getRoomsByCategory_ShouldReturnRoomsInCategory() {
-        // Arrange
         String category = "test-category";
         when(roomRepository.findByCategory(category)).thenReturn(List.of(testRoom));
 
-        // Act
         List<RoomDTO> result = roomService.getRoomsByCategory(category);
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Test Room", result.get(0).getName());
@@ -138,16 +126,13 @@ class RoomServiceTest {
 
     @Test
     void deleteRoom_ShouldCallRepository() {
-        // Act
         roomService.deleteRoom(1L);
 
-        // Assert
         verify(roomRepository).deleteById(1L);
     }
 
     @Test
     void updateRoom_ShouldUpdateAndReturnRoom() {
-        // Arrange
         RoomDTO updateDTO = new RoomDTO();
         updateDTO.setId(1L);
         updateDTO.setName("Updated Room");
@@ -170,10 +155,8 @@ class RoomServiceTest {
         when(roomRepository.save(any(Room.class))).thenReturn(updatedRoom);
         when(modelMapper.map(updatedRoom, RoomDTO.class)).thenReturn(updateDTO);
 
-        // Act
         RoomDTO result = roomService.updateRoom(updateDTO);
 
-        // Assert
         assertNotNull(result);
         assertEquals("Updated Room", result.getName());
         verify(roomRepository).findById(1L);
@@ -182,14 +165,12 @@ class RoomServiceTest {
 
     @Test
     void updateRoom_WithNonExistingRoom_ShouldThrowException() {
-        // Arrange
         RoomDTO updateDTO = new RoomDTO();
         updateDTO.setId(99L);
         updateDTO.setName("Updated Room");
 
         when(roomRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(NoSuchElementException.class, () -> roomService.updateRoom(updateDTO));
     }
 }

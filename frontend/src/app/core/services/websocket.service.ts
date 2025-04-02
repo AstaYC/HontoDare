@@ -30,7 +30,6 @@ export class WebSocketService {
 
 
 
-  // Subjects for message streams
   private messageSubjects: Map<string, Subject<any>> = new Map();
 
   constructor(
@@ -42,10 +41,8 @@ export class WebSocketService {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
     if (this.isBrowser) {
-      // Add polyfill for global to fix "global is not defined" error
       (window as any).global = window;
 
-      // Load libraries immediately on service initialization
       this.librariesLoadingPromise = this.loadWebSocketLibraries();
     }
   }
@@ -99,7 +96,6 @@ export class WebSocketService {
           console.log('Connected to WebSocket');
           this.connected = true;
 
-          // Track this connection in our map
           if (roomId) {
             if (!this.activeConnectionsByUser.has(username)) {
               this.activeConnectionsByUser.set(username, new Set());
@@ -377,7 +373,6 @@ export class WebSocketService {
     }
   }
 
-// Add method to update character
   updateGameCharacter(gameId: number, playerId: string, characterId: number): Promise<any> {
     return new Promise((resolve, reject) => {
       this.http.put<any>(

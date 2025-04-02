@@ -49,7 +49,6 @@ public class UserController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> updateUserJson(@PathVariable Long id, @RequestBody UserDTO userDTO) {
         try {
-            // Handle password if present
             String password = null;
             Map<String, Object> requestMap = new ObjectMapper().convertValue(userDTO, Map.class);
             if (requestMap.containsKey("password") && requestMap.get("password") != null
@@ -57,27 +56,22 @@ public class UserController {
                 password = requestMap.get("password").toString();
             }
 
-            // Get existing user to update
             User existingUser = userRepository.findById(id)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 
-            // Update fields
             if (userDTO.getUsername() != null) existingUser.setUsername(userDTO.getUsername());
             if (userDTO.getEmail() != null) existingUser.setEmail(userDTO.getEmail());
             if (userDTO.getName() != null) existingUser.setName(userDTO.getName());
             if (userDTO.getPoints() >= 0) existingUser.setPoints(userDTO.getPoints());
 
-            // Update avatar if provided
             if (userDTO.getAvatarUrl() != null) {
                 existingUser.setAvatarUrl(userDTO.getAvatarUrl());
             }
 
-            // Update role if provided (admin only)
             if (userDTO.getRole() != null) {
                 existingUser.setRole(Role.valueOf(userDTO.getRole()));
             }
 
-            // Update password if provided
             if (password != null) {
                 existingUser.setPassword(passwordEncoder.encode(password));
             }
@@ -96,59 +90,46 @@ public class UserController {
             @RequestParam(value = "avatar", required = false) MultipartFile file,
             @RequestParam(value = "userData", required = false) String userDataJson) {
         try {
-            // Parse user data from JSON string
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> dataMap = mapper.readValue(userDataJson, Map.class);
             UserDTO userDTO = mapper.convertValue(dataMap, UserDTO.class);
 
-            // Extract password if included
             String password = null;
             if (dataMap.containsKey("password") && dataMap.get("password") != null
                     && !dataMap.get("password").toString().isEmpty()) {
                 password = dataMap.get("password").toString();
             }
 
-            // Get existing user to update
             User existingUser = userRepository.findById(id)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 
-            // Update fields
             if (userDTO.getUsername() != null) existingUser.setUsername(userDTO.getUsername());
             if (userDTO.getEmail() != null) existingUser.setEmail(userDTO.getEmail());
             if (userDTO.getName() != null) existingUser.setName(userDTO.getName());
             if (userDTO.getPoints() >= 0) existingUser.setPoints(userDTO.getPoints());
 
-            // Update role if provided (admin only)
             if (userDTO.getRole() != null) {
                 existingUser.setRole(Role.valueOf(userDTO.getRole()));
             }
 
-            // Update password if provided
             if (password != null) {
                 existingUser.setPassword(passwordEncoder.encode(password));
             }
 
-            // Process file if provided
             if (file != null && !file.isEmpty()) {
                 try {
-                    // Generate unique filename
                     String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
-                    // Create proper file path - adjust this to your server's file structure
-                    // Using an absolute path that's accessible at runtime
                     String uploadDir = "uploads/userPic";
                     Path uploadPath = Paths.get(uploadDir);
 
-                    // Ensure directory exists
                     if (!Files.exists(uploadPath)) {
                         Files.createDirectories(uploadPath);
                     }
 
-                    // Save file
                     Path filePath = uploadPath.resolve(fileName);
                     Files.write(filePath, file.getBytes());
 
-                    // Set the URL path that will be accessible from frontend
                     existingUser.setAvatarUrl("/api/images/userPic/" + fileName);
                 } catch (Exception e) {
                     e.printStackTrace();

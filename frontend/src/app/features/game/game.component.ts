@@ -1,6 +1,4 @@
-// Update the game.component.ts file to include the new modal components
 
-// In src/app/features/game/game.component.ts - update the imports section
 import {
   Component,
   OnInit,
@@ -18,6 +16,8 @@ import { FormsModule } from "@angular/forms";
 import { RoomService } from "../../core/services/room.service";
 import { VictoryModalComponent } from "./victory-modal/victory-modal.component";
 import { DefeatModalComponent } from "./defeat-modal/defeat-modal.component";
+import {environment} from "../../../environments/environment";
+import {CharacterService} from "../../core/services/character.service";
 
 @Component({
   selector: "app-game",
@@ -43,22 +43,18 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
   opponentName = "Opponent"
   opponentId: string | null = null
 
-  // Character information - using placeholders instead of service
   myCharacter: any = { name: "YOUR CHARACTER" }
   opponentCharacter: any = { name: "MYSTERY CHARACTER" }
 
-  // Yes/No validation
   yesNoRegex = /^(yes|no|maybe)$/i
   invalidYesNoMessage = false
 
-  // Game state
   isGuessing = false
   guessInput = ""
   gameEnded = false
   winner: string | null = null
   gameId: number | null = null
 
-  // New properties for victory/defeat modals
   showVictoryModal = false;
   showDefeatModal = false;
 
@@ -68,6 +64,7 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
     private roomService: RoomService,
     private webSocketService: WebSocketService,
     private router: Router,
+    private characterService: CharacterService,
   ) {}
 
   ngOnInit() {
@@ -80,16 +77,14 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
       console.log("Player ID:", this.playerId)
       console.log("Room ID:", this.roomId)
 
-      // Get room information to find opponent
+
       this.getRoomInfo()
 
       this.webSocketService
         .connect(this.playerId, this.roomId)
         .then(() => {
-          // Subscribe to gameplay messages
           this.gameplaySubscription = this.webSocketService.subscribe(`/topic/room/${this.roomId}/gameplay`).subscribe({
             next: (message: any) => {
-              // Only add messages that have content and sender info
               if (message.content && message.sender) {
                 const senderName = message.sender === this.playerId ? this.playerName : this.opponentName
                 this.gameplayMessages.push({
@@ -102,12 +97,10 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
             error: (error) => console.error("Gameplay subscription error:", error),
           })
 
-          // Make sure to unsubscribe from any existing subscription first
           if (this.freeChatSubscription) {
             this.freeChatSubscription.unsubscribe()
           }
 
-          // Subscribe to free chat messages
           this.freeChatSubscription = this.webSocketService.subscribe(`/topic/room/${this.roomId}/free`).subscribe({
             next: (message: any) => {
               // Make sure this is a FREE_CHAT type message
@@ -119,28 +112,21 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
                 })
                 this.scrollToBottom("free")
               }
-              // Handle system messages
               else if (message.type === "SYSTEM_MESSAGE") {
-                // Handle victory claim
                 if (message.content.startsWith("VICTORY_CLAIMED:")) {
                   const winnerName = message.content.substring("VICTORY_CLAIMED:".length);
 
-                  // Only process if this is from the opponent
                   if (message.sender !== this.playerId) {
-                    // Don't end the game, just notify
                     this.addSystemMessage(`${winnerName} has claimed victory in this match!`);
                     this.addSystemMessage(`You can either concede defeat or claim your own victory.`);
                   }
                 }
-                // Handle concession
                 else if (message.content.startsWith("DEFEAT_CONCEDED:")) {
                   const parts = message.content.split(":");
                   const loserName = parts[1];
                   const winnerName = parts[2];
 
-                  // Only process if this is from the opponent
                   if (message.sender !== this.playerId) {
-                    // Don't end the game, just notify
                     this.addSystemMessage(`${loserName} has conceded defeat. You are the winner!`);
                     this.addSystemMessage(`You can claim your victory to officially end the match.`);
                   }
@@ -150,7 +136,6 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
             error: (error) => console.error("Free chat subscription error:", error),
           })
 
-          // Subscribe to match updates
           this.matchUpdatesSubscription = this.webSocketService.subscribe("/topic/match-updates").subscribe({
             next: (message: any) => {
               console.log("Match update received:", message)
@@ -158,8 +143,9 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
             error: (error) => console.error("Match updates subscription error:", error),
           })
 
-          // Load character info
           this.setupCharacters()
+          this.getCharacterImage();
+
         })
         .catch((error) => {
           console.error("WebSocket connection error:", error)
@@ -170,7 +156,6 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-  // Update the claimVictory method
   async claimVictory() {
     console.log("Claim victory method entered");
 
@@ -182,17 +167,14 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     if (!this.opponentId) {
       console.log("Missing opponent ID, trying to proceed anyway");
-      // Continue with the method instead of returning
     }
 
-    // Set state variables first to ensure UI updates
     this.gameEnded = true;
     this.winner = this.playerName;
     this.showVictoryModal = true;
     console.log("Victory modal set to show:", this.showVictoryModal);
 
     try {
-      // If we have opponent ID, complete the game
       if (this.opponentId) {
         console.log(`Completing game with Room: ${this.roomId}, Winner: ${this.playerId}, Loser: ${this.opponentId}`);
 
@@ -216,28 +198,23 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
       }
     } catch (error) {
       console.error("Error completing game:", error);
-      // Even if the API call fails, keep showing the victory modal
     }
   }
-  // Update the concedeDefeat method
 
   async concedeDefeat() {
     console.log("Concede defeat method entered");
 
-    // Don't return immediately, log the condition first
     if (this.gameEnded) {
       console.log("Game already ended, not proceeding with defeat concession");
       return;
     }
 
-    // Set state variables first to ensure UI updates
     this.gameEnded = true;
     this.winner = this.opponentName;
     this.showDefeatModal = true;
     console.log("Defeat modal set to show:", this.showDefeatModal);
 
     try {
-      // If we have opponent ID, complete the game
       if (this.opponentId) {
         console.log(`Completing game with Room: ${this.roomId}, Winner: ${this.opponentId}, Loser: ${this.playerId}`);
 
@@ -261,21 +238,17 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
       }
     } catch (error) {
       console.error("Error completing game:", error);
-      // Even if the API call fails, keep showing the defeat modal
     }
   }
 
 
-  // Keep all other existing methods
   getRoomInfo() {
-    // Use the existing roomService to get information about the room
-    // This replaces the character service functionality
+
     if (this.roomService.getRoomUsers) {
       this.roomService.getRoomUsers(this.roomId).subscribe({
         next: (users) => {
           console.log("Room users:", users)
 
-          // Find opponent (any user that's not the current player)
           const opponent = users.find((u) => u.userId.toString() !== this.playerId)
           if (opponent) {
             this.opponentId = opponent.userId.toString()
@@ -341,7 +314,6 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (confirm("Are you sure you want to leave the game?")) {
       const playerId = this.authService.getCurrentUserId()
       if (playerId) {
-        // Send WebSocket message first
         this.webSocketService.sendLeaveRoomMessage(this.roomId, playerId.toString())
 
         this.roomService.leaveRoom(this.roomId, playerId).subscribe({
@@ -382,16 +354,13 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.matchUpdatesSubscription.unsubscribe()
     }
 
-    // Ensure we disconnect from WebSocket
     this.webSocketService.disconnect()
   }
 
-  // Helper method to get initials for avatar
   getInitials(name: string): string {
     return name ? name.charAt(0).toUpperCase() : "?"
   }
 
-  // Helper to get random color based on user ID (for consistent colors)
   getAvatarColor(userId: string | undefined | null): string {
     if (!userId) return "from-gray-600 to-gray-800" // Default color
 
@@ -422,18 +391,43 @@ export class GameComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   setupCharacters() {
-    // For now using placeholder data
-    // In a real implementation, you would fetch this from a service
+
     this.myCharacter = {
       name: this.playerName + "'s Character",
-      // Add other character properties as needed
     }
 
     this.opponentCharacter = {
       name: "Mystery Character",
-      // Add other character properties as needed
     }
 
     console.log("Characters initialized:", this.myCharacter, this.opponentCharacter)
+  }
+
+
+  getCharacterImage(): void {
+    const storageKey = `character_${this.roomId}_${this.playerId}`;
+    const characterId = localStorage.getItem(storageKey);
+
+    if (characterId) {
+      this.characterService.getCharacterById(Number(characterId)).subscribe({
+        next: (character) => {
+          this.myCharacter = character;
+          if (character.picUrl) {
+            this.myCharacter.imageUrl = this.getImageUrl(character.picUrl);
+          }
+        },
+        error: (err) => {
+          console.error("Failed to fetch character:", err);
+        }
+      });
+    }
+  }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    if (path.startsWith('/assets')) return path; // This works for assets in Angular
+    // For backend-served images that don't start with /assets, add the base URL
+    return environment.apiUrl + path;
   }
 }

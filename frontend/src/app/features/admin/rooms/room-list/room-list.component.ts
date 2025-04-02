@@ -83,9 +83,9 @@ export class RoomAdminListComponent implements OnInit {
   getImageUrl(path: string): string {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    if (path.startsWith('/assets')) return path; // Assets are served directly
-    return path;
+    if (path.startsWith('/assets')) return path; // This works for assets in Angular
+    // For backend-served images that don't start with /assets, add the base URL
+    return environment.apiUrl + path;
   }
-
 
 }

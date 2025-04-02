@@ -189,7 +189,6 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
 
     this.leaveRoom();
 
-    // Add these properties
     this.waitingForOpponent = true;
     this.systemMessages = [];
 
@@ -234,18 +233,15 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
           }
         });
 
-      // Add a subscription to free chat for system messages
       this.freeChatSubscription = this.webSocketService
         .subscribe(`/topic/room/${this.roomId}/free`)
         .subscribe({
           next: (message: any) => {
             console.log('Free chat message received:', message);
 
-            // Handle system messages for player joining
             if (message.type === 'SYSTEM_MESSAGE' && message.content.startsWith('PLAYER_JOINED:')) {
               const joiningPlayerName = message.content.substring('PLAYER_JOINED:'.length);
 
-              // If it's not the current player
               if (message.sender !== this.playerId) {
                 this.opponentId = message.sender;
                 this.opponentName = joiningPlayerName;
@@ -264,7 +260,6 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     }
   }
 
-// Add this helper method
   addSystemMessage(message: string) {
     this.systemMessages.push({
       content: message,
@@ -277,24 +272,18 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
     if (confirm('Are you sure you want to leave the game? Your progress will be lost.')) {
       if (this.playerId) {
         try {
-          // Ensure WebSocket connection exists
           await this.webSocketService.connect(this.playerId, this.roomId);
 
-          // Send leave message
           this.webSocketService.sendLeaveRoomMessage(this.roomId, this.playerId);
 
-          // Clean up subscriptions
           if (this.roomSubscription) {
             this.roomSubscription.unsubscribe();
           }
 
-          // Clear uploads
           this.webSocketService.clearUploads(this.roomId);
 
-          // Disconnect WebSocket
           this.webSocketService.disconnect();
 
-          // Navigate back to rooms
           await this.router.navigate(['/rooms']);
           console.log('Successfully left the game');
         } catch (error) {
@@ -318,10 +307,8 @@ export class CharacterUploadComponent implements OnInit, OnDestroy {
   leaveRoom() {
     const playerId = this.authService.getCurrentUserId();
     if (playerId) {
-      // Send WebSocket message first
       this.webSocketService.sendLeaveRoomMessage(this.roomId, playerId.toString());
 
-      // Then call the REST API
       this.roomService.leaveRoom(this.roomId, playerId).subscribe({
         next: () => {
           this.webSocketService.disconnect();

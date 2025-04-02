@@ -37,9 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                // Add JWT filter before processing authentication request
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                // Ensure session is stateless
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic();
 
@@ -53,7 +51,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Define in-memory users for simplicity
         UserDetails admin = User.withUsername("admin")
                 .password(passwordEncoder().encode("admin123"))
                 .roles("ADMIN")

@@ -26,7 +26,7 @@ export class LoginComponent {
   ) {}
 
   login() {
-    // Clear previous messages
+
     this.errorMessage = ""
     this.successMessage = ""
 
@@ -41,7 +41,6 @@ export class LoginComponent {
           this.successMessage = "Login successful"
           this.tokenService.saveToken(response)
 
-          // Redirect based on user role
           setTimeout(() => {
             if (this.tokenService.getUserRole() == "ADMIN") {
               this.router.navigate(["/admin/users"])
@@ -50,7 +49,7 @@ export class LoginComponent {
             } else {
               this.router.navigate(["/home"])
             }
-          }, 1000) // Short delay to show success message
+          }, 1000)
         } else {
           this.errorMessage = "Login failed. Please check your credentials"
         }

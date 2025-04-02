@@ -42,7 +42,6 @@ public class CharacterController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    // Track which players have uploaded in each room
     private Map<Long, Map<Long, Boolean>> roomUploads = new ConcurrentHashMap<>();
 
     @GetMapping
@@ -67,49 +66,38 @@ public class CharacterController {
         try {
             System.out.println("Character upload endpoint hit!");
 
-            // Convert JSON string to CharacterDTO
             ObjectMapper mapper = new ObjectMapper();
             CharacterDTO characterDTO = mapper.readValue(characterJson, CharacterDTO.class);
 
-            // Process file if provided
             if (file != null && !file.isEmpty()) {
-                // Generate unique filename
                 String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
-                // Set path to frontend/src/assets/characterPic
                 Path uploadPath = Paths.get("frontend/src/assets/characterPic");
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
 
-                // Save file
                 Files.write(uploadPath.resolve(fileName), file.getBytes());
 
-                // Set URL in character - referencing assets folder for frontend
                 characterDTO.setPicUrl("/assets/characterPic/" + fileName);
             }
 
-            // Save character
             CharacterDTO savedCharacter = characterService.createCharacter(characterDTO);
 
-            // Track this upload
             Long roomId = characterDTO.getRoomId();
             Long userId = characterDTO.getUserId();
 
             roomUploads.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>())
                     .put(userId, true);
 
-            // Check if all players in room have uploaded
             boolean allUploaded = checkAllPlayersUploaded(roomId);
 
-            // Send upload notification
             Map<String, Object> message = new HashMap<>();
             message.put("type", "CHARACTER_UPLOADED");
             message.put("playerId", userId);
             message.put("roomId", roomId);
             messagingTemplate.convertAndSend("/topic/room/" + roomId, message);
 
-            // If all uploaded, send another message
             if (allUploaded) {
                 Map<String, Object> allUploadedMessage = new HashMap<>();
                 allUploadedMessage.put("type", "ALL_PLAYERS_UPLOADED");
@@ -153,27 +141,23 @@ public class CharacterController {
     }
 
     private boolean checkAllPlayersUploaded(Long roomId) {
-        // Get all users in the room from waiting table
         List<Long> playersInRoom = waitingRepository.findByRoomId(roomId)
                 .stream()
                 .map(Waiting::getUserId)
                 .collect(Collectors.toList());
 
-        // Get uploads for this room
         Map<Long, Boolean> uploads = roomUploads.getOrDefault(roomId, new HashMap<>());
 
-        // Check if all players have uploaded
         if (playersInRoom.isEmpty() || uploads.isEmpty()) {
             return false;
         }
 
-        // Check that each player in the room has uploaded
         for (Long playerId : playersInRoom) {
             if (!uploads.getOrDefault(playerId, false)) {
                 return false; // At least one player hasn't uploaded
             }
         }
 
-        return true; // All players have uploaded
+        return true;
     }
 }

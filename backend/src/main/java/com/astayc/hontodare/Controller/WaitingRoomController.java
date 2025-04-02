@@ -20,7 +20,6 @@ public class WaitingRoomController {
 
     private final SimpMessageSendingOperations messagingTemplate;
 
-    // Map to track players in each room
     private final Map<Long, Set<String>> roomPlayers = new ConcurrentHashMap<>();
 
     @MessageMapping("/room.join")
@@ -33,15 +32,12 @@ public class WaitingRoomController {
         log.info("Player {} joined room {}", playerId, roomId);
 
 
-        // Store user info in WebSocket session
         headerAccessor.getSessionAttributes().put("username", playerId);
         headerAccessor.getSessionAttributes().put("roomId", roomId);
 
-        // Add player to room
         roomPlayers.computeIfAbsent(roomId, k -> new CopyOnWriteArraySet<>()).add(playerId);
         Set<String> players = roomPlayers.get(roomId);
 
-        // Notify room that player joined
         Map<String, Object> playerJoinedMessage = Map.of(
                 "type", "PLAYER_JOINED",
                 "playerId", playerId,
@@ -51,11 +47,9 @@ public class WaitingRoomController {
 
         messagingTemplate.convertAndSend("/topic/room/" + roomId, playerJoinedMessage);
 
-        // Check if we have 2 players for a match
         if (players.size() == 2) {
             log.info("Match created in room {} with players {}", roomId, players);
 
-            // Send match created notification
             Map<String, Object> matchCreatedMessage = Map.of(
                     "type", "MATCH_CREATED",
                     "roomId", roomId,
@@ -74,17 +68,14 @@ public class WaitingRoomController {
 
         log.info("Player {} left room {}", playerId, roomId);
 
-        // Remove player from room
         Set<String> players = roomPlayers.get(roomId);
         if (players != null) {
             players.remove(playerId);
 
-            // If room is empty, remove it
             if (players.isEmpty()) {
                 roomPlayers.remove(roomId);
             }
 
-            // Notify room that player left
             Map<String, Object> playerLeftMessage = Map.of(
                     "type", "PLAYER_LEFT",
                     "playerId", playerId,

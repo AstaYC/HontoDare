@@ -43,7 +43,6 @@ public class GameController {
     @PostMapping("/complete")
     public ResponseEntity<GameDTO> completeGame(@RequestBody GameDTO gameDTO) {
         try {
-            // Check if an unfinished game exists for these players
             Optional<Game> existingGame = gameRepository.findUnfinishedGameForPlayers(
                     gameDTO.getRoomId(),
                     gameDTO.getPlayer1Id(),
@@ -51,11 +50,9 @@ public class GameController {
             );   
 
             if (existingGame.isPresent()) {
-                // Update existing game with character2
                 Game game = existingGame.get();
                 GameDTO updateDTO = modelMapper.map(game, GameDTO.class);
 
-                // Update the DTO
                 updateDTO.setCharacter2Id(gameDTO.getCharacter2Id());
                 updateDTO.setEndTime(new Timestamp(System.currentTimeMillis()));
                 return ResponseEntity.ok(gameService.updateGame(updateDTO));
@@ -66,7 +63,7 @@ public class GameController {
                 return ResponseEntity.ok(gameService.createGame(gameDTO));
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Add this for debugging
+            e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
     }
@@ -87,7 +84,6 @@ public class GameController {
             return ResponseEntity.notFound().build();
         }
 
-        // Set winner and end time
         gameDTO.setWinnerId(winnerId);
         gameDTO.setEndTime(new Timestamp(System.currentTimeMillis()));
 
@@ -135,7 +131,6 @@ public class GameController {
             return ResponseEntity.notFound().build();
         }
 
-        // Update the appropriate character ID based on player position
         if (playerId.equals(gameDTO.getPlayer1Id())) {
             gameDTO.setCharacter1Id(characterId);
         } else if (playerId.equals(gameDTO.getPlayer2Id())) {

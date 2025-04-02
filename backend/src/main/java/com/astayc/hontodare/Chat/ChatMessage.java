@@ -14,6 +14,6 @@ public class ChatMessage {
     private String sender;
     private String content;
     private MessageType type;
-    private Long roomId; // Room ID for match updates
-    private List<Long> players; // List of player IDs in the room
+    private Long roomId;
+    private List<Long> players;
 }

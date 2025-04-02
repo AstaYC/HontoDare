@@ -80,13 +80,10 @@ export class HomeComponent {
     const button = event.currentTarget as HTMLElement
 
     if (modal && modalContent) {
-      // Get button position
       const buttonRect = button.getBoundingClientRect()
 
-      // Set initial position for animation
       modalContent.style.transformOrigin = `center ${window.innerHeight - buttonRect.top}px`
 
-      // Show modal
       modal.classList.remove("hidden")
     }
   }

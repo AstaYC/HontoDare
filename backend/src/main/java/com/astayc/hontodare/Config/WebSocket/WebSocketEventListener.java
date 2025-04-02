@@ -25,7 +25,6 @@ public class WebSocketEventListener {
         if (username != null) {
             log.info("User Disconnected: " + username);
 
-            // Notify all users that a user has left
             ChatMessage leaveMessage = ChatMessage.builder()
                     .content(username + " left!")
                     .type(MessageType.LEAVE)

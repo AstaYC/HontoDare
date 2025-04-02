@@ -25,16 +25,13 @@ public class ChatController {
         MessageType type = chatMessage.getType();
         Long roomId = chatMessage.getRoomId();
 
-        // Log the incoming message
         log.info("Chat message received: type={}, sender={}, roomId={}", type, sender, roomId);
 
-        // Send message to the appropriate destination based on type and roomId
         switch (type) {
             case CHAT:
                 messagingTemplate.convertAndSend("/topic/public", chatMessage);
                 break;
             case GAMEPLAY_CHAT:
-                // If roomId is present, send to room-specific topic
                 if (roomId != null) {
                     messagingTemplate.convertAndSend("/topic/room/" + roomId + "/gameplay", chatMessage);
                 } else {
@@ -42,14 +39,13 @@ public class ChatController {
                 }
                 break;
             case FREE_CHAT:
-                // If roomId is present, send to room-specific topic
                 if (roomId != null) {
                     messagingTemplate.convertAndSend("/topic/room/" + roomId + "/free", chatMessage);
                 } else {
                     messagingTemplate.convertAndSend("/topic/free-chat", chatMessage);
                 }
                 break;
-            case SYSTEM_MESSAGE: // Add this case
+            case SYSTEM_MESSAGE:
                 if (roomId != null) {
                     messagingTemplate.convertAndSend("/topic/room/" + roomId + "/free", chatMessage);
                 } else {
@@ -63,10 +59,8 @@ public class ChatController {
 
     @MessageMapping("/chat.addUser")
     public void addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-        // Add the username to the WebSocket session
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
 
-        // Notify all users that a new user has joined
         ChatMessage joinMessage = ChatMessage.builder()
                 .content(chatMessage.getSender() + " joined!")
                 .type(MessageType.JOIN)

@@ -39,29 +39,22 @@ public class RoomController {
             @RequestParam("roomData") String roomDataJson,
             @RequestParam(value = "roomPic", required = false) MultipartFile file) {
         try {
-            // Parse room data from JSON
             ObjectMapper mapper = new ObjectMapper();
             RoomDTO roomDTO = mapper.readValue(roomDataJson, RoomDTO.class);
 
-            // Process file if provided
             if (file != null && !file.isEmpty()) {
-                // Generate unique filename
                 String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
-                // Set path to frontend/src/assets/roomPic
                 Path uploadPath = Paths.get("frontend/src/assets/roomPic");
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
 
-                // Save file
                 Files.write(uploadPath.resolve(fileName), file.getBytes());
 
-                // Set roomPicUrl in roomDTO
                 roomDTO.setRoomPicUrl("/assets/roomPic/" + fileName);
             }
 
-            // Create room with or without picture
             RoomDTO createdRoom = roomService.createRoom(roomDTO);
             return ResponseEntity.ok(createdRoom);
         } catch (Exception e) {
@@ -76,30 +69,23 @@ public class RoomController {
             @RequestParam("roomData") String roomDataJson,
             @RequestParam(value = "roomPic", required = false) MultipartFile file) {
         try {
-            // Parse room data from JSON
             ObjectMapper mapper = new ObjectMapper();
             RoomDTO roomDTO = mapper.readValue(roomDataJson, RoomDTO.class);
             roomDTO.setId(id);
 
-            // Process file if provided
             if (file != null && !file.isEmpty()) {
-                // Generate unique filename
                 String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
-                // Set path to frontend/src/assets/roomPic
                 Path uploadPath = Paths.get("frontend/src/assets/roomPic");
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
 
-                // Save file
                 Files.write(uploadPath.resolve(fileName), file.getBytes());
 
-                // Set roomPicUrl in roomDTO
                 roomDTO.setRoomPicUrl("/assets/roomPic/" + fileName);
             }
 
-            // Update room with or without picture
             RoomDTO updatedRoom = roomService.updateRoom(roomDTO);
             return ResponseEntity.ok(updatedRoom);
         } catch (Exception e) {

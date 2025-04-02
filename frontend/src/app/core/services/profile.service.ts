@@ -20,7 +20,6 @@ export class ProfileService {
   }
 
   updateUserProfile(userId: number, formData: FormData): Observable<User> {
-    // Don't set Content-Type manually - browser will set proper multipart/form-data with boundary
     return this.http.put<User>(`${this.apiUrl}/${userId}`, formData)
       .pipe(catchError(this.handleError));
   }
@@ -34,10 +33,8 @@ export class ProfileService {
     let errorMessage = 'An unknown error occurred';
 
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
       if (error.error && error.error.message) {
         errorMessage = error.error.message;
       } else if (error.status) {

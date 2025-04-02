@@ -37,13 +37,11 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
     this.loadRoomUsers();
     this.startWaitingTimer();
 
-    // Connect to WebSocket
     const playerId = this.authService.getCurrentUserId();
     if (playerId) {
       this.webSocketService.connect(playerId.toString(), this.roomId).then(() => {
         console.log('WebSocket connection established');
 
-        // Single subscription - use subscribeToRoom
         this.roomSubscription = this.webSocketService
           .subscribeToRoom(this.roomId)
           .subscribe((message: any) => {
@@ -61,7 +59,6 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
             }
           });
 
-        // Join the room
         this.webSocketService.sendJoinRoomMessage(this.roomId, playerId.toString());
       }).catch((error: any) => {
         console.error('WebSocket connection failed:', error);
@@ -107,10 +104,8 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
   leaveRoom() {
     const playerId = this.authService.getCurrentUserId();
     if (playerId) {
-      // Send WebSocket message first
       this.webSocketService.sendLeaveRoomMessage(this.roomId, playerId.toString());
 
-      // Then call the REST API
       this.roomService.leaveRoom(this.roomId, playerId).subscribe({
         next: () => {
           this.webSocketService.disconnect();
@@ -135,14 +130,12 @@ export class WaitingRoomComponent implements OnInit, OnDestroy {
   }
 
   getPlayerDisplayName(player: any): string {
-    // If this is the current user, use the localStorage username
     const currentUserId = this.authService.getCurrentUserId();
     if (player.userId === currentUserId) {
       return localStorage.getItem('username') || localStorage.getItem('name') ||
         player.username || player.name || `Player ${player.userId}`;
     }
 
-    // For other players
     return player.username || player.name || `Player ${player.userId}`;
   }
 

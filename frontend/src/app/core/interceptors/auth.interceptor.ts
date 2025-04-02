@@ -22,7 +22,7 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError((error) => {
         if (error.status === 401 || error.status === 403) {
-          this.tokenService.clearToken(); // Clear the invalid token
+          this.tokenService.clearToken();
           this.router.navigate(['/login']);
         }
         return throwError(() => error);

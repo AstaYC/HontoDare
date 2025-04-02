@@ -1,4 +1,3 @@
-// src/app/core/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, catchError, map, Observable, of, tap, throwError } from 'rxjs';
@@ -34,7 +33,6 @@ export class AuthService {
             localStorage.setItem('role', userRole);
           }
 
-          // Store username in localStorage
           const userData = this.tokenService.getDecodedToken(response);
           if (userData) {
             if (userData.username) {
