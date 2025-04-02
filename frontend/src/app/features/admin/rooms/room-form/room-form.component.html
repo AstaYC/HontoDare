@@ -61,17 +61,13 @@
 
               <div>
                 <label for="category" class="block text-gray-400 mb-1">Category</label>
-                <select
+                <input
+                  type="text"
                   id="category"
                   formControlName="category"
                   class="w-full bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
-                >
-                  <option value="" disabled>Select a category</option>
-                  <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
-                </select>
-                <div *ngIf="roomForm.get('category')?.invalid && roomForm.get('category')?.touched" class="text-red-400 text-sm mt-1">
-                  Category is required
-                </div>
+                  placeholder="Enter category name"
+                />
               </div>
 
               <div class="grid grid-cols-1 gap-6 mt-6">

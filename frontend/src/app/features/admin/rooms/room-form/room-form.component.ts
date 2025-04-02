@@ -31,8 +31,6 @@ export class RoomFormComponent implements OnInit {
   selectedFile: File | null = null;
   previewUrl: string | null = null;
 
-  // Predefined categories - you may want to load these from an API
-  categories = ['Action', 'Adventure', 'RPG', 'Strategy', 'Puzzle'];
 
   constructor(
     private fb: FormBuilder,
