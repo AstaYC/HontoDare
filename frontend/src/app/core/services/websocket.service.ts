@@ -4,9 +4,7 @@ import { Subject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { WebSocketSubject } from 'rxjs/webSocket';
-import { webSocket } from 'rxjs/webSocket';
-import { Observable } from 'rxjs';
+
 import { GameService } from './game.service';
 
 
@@ -26,8 +24,6 @@ export class WebSocketService {
   private characterUploads: Map<number, Set<string>> = new Map();
   private connected: boolean = false;
   private apiUrl = environment.apiUrl;
-
-
 
 
   private messageSubjects: Map<string, Subject<any>> = new Map();
@@ -160,12 +156,6 @@ export class WebSocketService {
     return this.messageSubjects.get(topic)!;
   }
 
-  sendMessage(content: string, type: string): void {
-    if (this.stompClient && this.username) {
-      const chatMessage = { sender: this.username, content, type };
-      this.stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
-    }
-  }
 
   disconnect(): void {
     if (this.stompClient && this.stompClient.connected) {
@@ -215,21 +205,6 @@ export class WebSocketService {
     });
 
     console.log(`Successfully subscribed to topic ${topic}`);
-  }
-
-  private subscribeToTopic(topic: string): void {
-    if (!this.stompClient || !this.stompClient.connected) return;
-
-    this.stompClient.subscribe(topic, (message: any) => {
-      const parsedMessage = JSON.parse(message.body);
-      console.log(`Received message on topic ${topic}:`, parsedMessage);
-
-      // Emit the message to the corresponding subject
-      const subject = this.messageSubjects.get(topic);
-      if (subject) {
-        subject.next(parsedMessage);
-      }
-    });
   }
 
   // sendChatMessage(content: string, type: string, sender: string, roomId?: number): void {
@@ -320,9 +295,6 @@ export class WebSocketService {
     }
   }
 
-  getUploadCount(roomId: number): number {
-    return this.characterUploads.get(roomId)?.size || 0;
-  }
 
   clearUploads(roomId: number) {
     this.characterUploads.delete(roomId);
@@ -371,27 +343,6 @@ export class WebSocketService {
       console.error('Error in completeGame:', error);
       return Promise.reject(error);
     }
-  }
-
-  updateGameCharacter(gameId: number, playerId: string, characterId: number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.http.put<any>(
-        `${this.apiUrl}/api/game/${gameId}/update-character`,
-        {},
-        {
-          params: {
-            playerId: playerId,
-            characterId: characterId.toString()
-          }
-        }
-      ).subscribe({
-        next: (response) => resolve(response),
-        error: (error) => reject(error)
-      });
-    });
-  }
-  getCharacterUploadsForRoom(roomId: number): string[] {
-    return Array.from(this.characterUploads.get(roomId) || []);
   }
 
 }
